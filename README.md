@@ -1,9 +1,11 @@
 # final_project_cst380
 
 Description
+
 Sports Buddy Finder is a social networking app designed to bridge the gap between solo athletes and local pickup games. Whether you're looking for people for a soccer match or a full squad for a basketball run, this app allows users to find, host, and join local sporting events in real-time based on location and skill level.
 
 App Evaluation
+
 Category: Social / Fitness
 
 Mobile: Mobile is essential for real-time GPS location tracking to find nearby games and for push notifications to alert users of upcoming game starts or new joins.
@@ -17,6 +19,7 @@ Habit: High frequency; users engage whenever they feel like exercising or checki
 Scope: Clearly defined. The MVP focuses on game discovery and creation, while later versions can expand into in-app messaging and skill-based matchmaking.
 
 Product Spec
+
 1. User Stories (Required and Optional)
 Required Must-have Stories
 
@@ -39,6 +42,7 @@ User can rate other players' skill levels or sportsmanship.
 User receives a push notification 30 minutes before a game starts.
 
 2. Screen Archetypes
+
 Login / Register Screen
 
 User can sign up or log in to their account.
@@ -64,6 +68,7 @@ Profile Screen
 User can see their stats, bio, and history of games played.
 
 3. Navigation
+
 Tab Navigation (Tab to Screen)
 
 Map: Browse games geographically.
