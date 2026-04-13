@@ -72,7 +72,8 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 
 - ## Wireframes
 
-[Add picture of your hand sketched wireframes in this section]
+Here's the wireframe handwritten diagram:
+![Wireframe](https://github.com/cst380-final-project-group2-spr26/final_project_cst380/blob/adding-diagram/wireframe.png)
 
 ### [BONUS] Digital Wireframes & Mockups
 
