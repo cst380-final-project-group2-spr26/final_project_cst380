@@ -89,19 +89,61 @@ https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 
 ### Models
 
-[Model Name, e.g., User]
+[User]
 | Property | Type   | Description                                  |
 |----------|--------|----------------------------------------------|
 | username | String | unique id for the user post (default field)   |
 | password | String | user's password for login authentication      |
-| ...      | ...    | ...                          
+| email          | String        | user email                       |
+| bio            | String        | short user bio                   |
+| skillLevel     | String        | player's general skill level     |
+| favoriteSports | Array<String> | list of sports the user enjoys   |
+| profileImage   | File          | optional profile picture         |
+
+[Game]
+| Property       | Type          | Description                              |
+| -------------- | ------------- | ---------------------------------------- |
+| title          | String        | title of the game event                  |
+| sportType      | String        | type of sport (basketball, soccer, etc.) |
+| dateTime       | Date          | scheduled time of the game               |
+| locationName   | String        | name of the location                     |
+| latitude       | Number        | latitude for map                         |
+| longitude      | Number        | longitude for map                        |
+| skillLevel     | String        | recommended skill level                  |
+| maxPlayers     | Number        | max number of players allowed            |
+| currentPlayers | Number        | number of players currently joined       |
+| details        | String        | additional notes or rules                |
+| host           | Pointer<User> | user who created the game                |
+| isActive       | Boolean       | indicates if the game is still open      |
+
+[Atendance]
+| Property | Type          | Description                |
+| -------- | ------------- | -------------------------- |
+| user     | Pointer<User> | user joining the game      |
+| game     | Pointer<Game> | game being joined          |
+| status   | String        | joined or canceled         |
+| joinedAt | Date          | timestamp when user joined |
+
+#These are the most essential for now but more might be introduced.
 
 
 ### Networking
 
-- [List of network requests by screen]
-- [Example: `[GET] /users` - to retrieve user data]
-- ...
-- [Add list of network requests by screen ]
-- [Create basic snippets for each Parse network request]
-- [OPTIONAL: List endpoints if using existing API such as Yelp]
+Login Screen
+- [POST] /_User - register a new user
+- [GET] /_User - log in existing user
+#Map/List View
+- [GET] /classes/Game - retrieve active games
+- [GET] /classes/Game - filter games by sport or location
+#Detail View
+- [GET] /classes/Game/:id - retrieve selected game details
+- [POST] /classes/Attendance - join a game
+#Create Game Screen
+- [POST] /classes/Game - create a new game
+#Profile Screen
+- [GET] /_User/:id - retrieve current user profile
+- [GET] /classes/Attendance - retrieve joined games
+- [PUT] /_User/:id - update user profile
+#Optional Chat
+- [POST] /classes/Message - send a message
+- [GET] /classes/Message - retrieve chat messages for a game
