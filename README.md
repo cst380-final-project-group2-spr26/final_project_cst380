@@ -62,9 +62,40 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - List: Browse games chronologically.
 - Create: Host a new game.
 - Profile: Manage user settings and history.
-- Flow Navigation (Screen to Screen)
+  
+**Flow Navigation** (Screen to Screen)
 - Map/List View * Leads to Detail View when a game is selected.
 - Detail View
 - Leads back to Map/List or stays on page after "Join" is clicked.
 - Creation Screen
 - Leads to Map/List after the game is successfully posted.
+
+- ## Wireframes
+
+[Add picture of your hand sketched wireframes in this section]
+
+### [BONUS] Digital Wireframes & Mockups
+
+### [BONUS] Interactive Prototype
+
+## Schema 
+
+
+### Models
+
+[Model Name, e.g., User]
+| Property | Type   | Description                                  |
+|----------|--------|----------------------------------------------|
+| username | String | unique id for the user post (default field)   |
+| password | String | user's password for login authentication      |
+| ...      | ...    | ...                          
+
+
+### Networking
+
+- [List of network requests by screen]
+- [Example: `[GET] /users` - to retrieve user data]
+- ...
+- [Add list of network requests by screen ]
+- [Create basic snippets for each Parse network request]
+- [OPTIONAL: List endpoints if using existing API such as Yelp]
