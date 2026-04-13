@@ -132,18 +132,18 @@ https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 Login Screen
 - [POST] /_User - register a new user
 - [GET] /_User - log in existing user
-#Map/List View
+Map/List View
 - [GET] /classes/Game - retrieve active games
 - [GET] /classes/Game - filter games by sport or location
-#Detail View
+Detail View
 - [GET] /classes/Game/:id - retrieve selected game details
 - [POST] /classes/Attendance - join a game
-#Create Game Screen
+Create Game Screen
 - [POST] /classes/Game - create a new game
-#Profile Screen
+Profile Screen
 - [GET] /_User/:id - retrieve current user profile
 - [GET] /classes/Attendance - retrieve joined games
 - [PUT] /_User/:id - update user profile
-#Optional Chat
+Optional Chat
 - [POST] /classes/Message - send a message
 - [GET] /classes/Message - retrieve chat messages for a game
