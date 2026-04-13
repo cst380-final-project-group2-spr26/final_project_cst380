@@ -82,6 +82,8 @@ Here's the wireframe diagram from Figma:
 
 ### [BONUS] Interactive Prototype
 
+https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
+
 ## Schema 
 
 
