@@ -76,6 +76,9 @@ Here's the wireframe handwritten diagram:
 ![Wireframe](wireframe.png)
 
 ### [BONUS] Digital Wireframes & Mockups
+Here's the wireframe diagram from Figma:
+![Wireframe](https://github.com/user-attachments/assets/62bc4077-b1a1-48b9-a0e5-c7586220647d)
+
 
 ### [BONUS] Interactive Prototype
 
