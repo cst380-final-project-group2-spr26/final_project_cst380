@@ -124,7 +124,7 @@ https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 | status   | String        | joined or canceled         |
 | joinedAt | Date          | timestamp when user joined |
 
-#These are the most essential for now but more might be introduced.
+#These are the most important for now but more might be introduced.
 
 
 ### Networking
