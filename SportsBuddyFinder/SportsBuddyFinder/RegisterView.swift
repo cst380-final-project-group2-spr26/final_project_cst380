@@ -18,46 +18,82 @@ struct RegisterView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Text("Sports Buddy Finder")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+            ZStack {
+                //background
+                LinearGradient(
+                    colors: [Color.purple, Color.blue],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                Text("Create an account to continue")
-                    .foregroundStyle(.secondary)
+                VStack {
+                    //header
+                    VStack(spacing: 8) {
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
 
-                TextField("Email", text: $email)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+                        Text("Sports Buddy Finder")
+                            .font(.title)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.top, 50)
 
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
+                    Spacer()
 
-                SecureField("Confirm Password", text: $confirmPassword)
-                    .textFieldStyle(.roundedBorder)
+                    // 💎 REGISTER CARD
+                    VStack(spacing: 20) {
+                        Text("Create Account")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
 
-                Button("Sign Up") {
-                    signUp()
+                        Text("Join and find your sports buddy")
+                            .foregroundColor(.gray)
+
+                        AuthTextField(placeholder: "Email", text: $email)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+
+                        AuthTextField(placeholder: "Password", text: $password, isSecure: true)
+
+                        AuthTextField(placeholder: "Confirm Password", text: $confirmPassword, isSecure: true)
+
+                        Button(action: signUp) {
+                            Text("Sign Up")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.purple)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+
+                        NavigationLink("Already have an account? Log In") {
+                            LoginView(isLoggedIn: $isLoggedIn)
+                        }
+                        .font(.footnote)
+
+                        if !message.isEmpty {
+                            Text(message)
+                                .foregroundColor(.red)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding()
+                    .background(.white)
+                    .cornerRadius(25)
+                    .shadow(radius: 10)
+                    .padding()
+
+                    Spacer()
                 }
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity)
-
-                if !message.isEmpty {
-                    Text(message)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                }
-                NavigationLink("Already have an account? Log In") {
-                    LoginView(isLoggedIn: $isLoggedIn)
-                }
-                Spacer()
             }
-            .padding()
         }
     }
 
+    //Firebase Signup
     func signUp() {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -86,8 +122,4 @@ struct RegisterView: View {
             isLoggedIn = true
         }
     }
-}
-
-#Preview {
-    RegisterView(isLoggedIn: .constant(false))
 }

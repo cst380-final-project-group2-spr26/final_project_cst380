@@ -17,43 +17,79 @@ struct LoginView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Text("Sports Buddy Finder")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+            ZStack {
+                //background
+                LinearGradient(
+                    colors: [Color.blue, Color.purple],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                Text("Log in to your account")
-                    .foregroundStyle(.secondary)
+                VStack {
+                    //header
+                    VStack(spacing: 8) {
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
 
-                TextField("Email", text: $email)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
+                        Text("Sports Buddy Finder")
+                            .font(.title)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.top, 50)
 
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
+                    Spacer()
 
-                Button("Log In") {
-                    login()
+                    //login
+                    VStack(spacing: 20) {
+                        Text("Welcome Back")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+
+                        Text("Log in to continue")
+                            .foregroundColor(.gray)
+
+                        AuthTextField(placeholder: "Email", text: $email)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+
+                        AuthTextField(placeholder: "Password", text: $password, isSecure: true)
+
+                        Button(action: login) {
+                            Text("Log In")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+
+                        NavigationLink("Don't have an account? Sign Up") {
+                            RegisterView(isLoggedIn: $isLoggedIn)
+                        }
+                        .font(.footnote)
+
+                        if !message.isEmpty {
+                            Text(message)
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
+                    }
+                    .padding()
+                    .background(.white)
+                    .cornerRadius(25)
+                    .shadow(radius: 10)
+                    .padding()
+
+                    Spacer()
                 }
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity)
-
-                NavigationLink("Don't have an account? Sign Up") {
-                    RegisterView(isLoggedIn: $isLoggedIn)
-                }
-
-                if !message.isEmpty {
-                    Text(message)
-                        .foregroundStyle(.red)
-                }
-
-                Spacer()
             }
-            .padding()
         }
     }
 
+    //Firebase Login
     func login() {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
