@@ -14,9 +14,9 @@ struct ContentView: View {
     var body: some View {
         Group {
             if isLoggedIn {
-                HomeView(isLoggedIn: $isLoggedIn)
+                MainTabView(isLoggedIn: $isLoggedIn)
             } else {
-                RegisterView(isLoggedIn: $isLoggedIn)
+                LoginView(isLoggedIn: $isLoggedIn)
             }
         }
         .onAppear {
