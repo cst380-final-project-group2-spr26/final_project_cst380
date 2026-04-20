@@ -79,6 +79,46 @@ Here's the wireframe handwritten diagram:
 Here's the wireframe diagram from Figma:
 ![Wireframe](https://github.com/user-attachments/assets/62bc4077-b1a1-48b9-a0e5-c7586220647d)
 
+### App Screenshots
+
+![Login](https://github.com/user-attachments/assets/5733cec2-fbac-427f-a29e-9a95439a053c")
+![Register](https://github.com/user-attachments/assets/4163a338-8514-4236-a299-8924470cc829")
+![Map](https://github.com/user-attachments/assets/c4ab786d-af96-4e40-8d2d-c8baa34cf434)
+![List](https://github.com/user-attachments/assets/7e4729dd-8aa1-459d-8edd-6a2de6354bd7")
+![Create](https://github.com/user-attachments/assets/a57ebf08-3cc0-41ac-8323-e781887da29d")
+![Profile](https://github.com/user-attachments/assets/5bb307bd-2349-4bae-b724-8dd7eaeca5db")
+
+## Sprint 1 Progress
+
+### Completed Features
+- Implemented user registration using Firebase
+- Implemented user login functionality
+- Added tab bar navigation (Map, List, Create, Profile)
+- Created UI placeholders for all main screens
+- Implemented logout functionality
+
+### UI Screens Implemented
+- Login Screen
+- Register Screen
+- Map Screen
+- List Screen
+- Create Screen
+- Profile Screen
+
+## Sprint 2 Plan
+
+### Goals
+- Implement Create Game functionality with Firebase
+- Store and retrieve game data from backend
+- Display real game data in ListView
+- Integrate MapKit to show game locations on map
+- Implement Join Game functionality
+
+### Planned Issues
+- Create Game backend integration
+- Fetch and display games in ListView
+- Add MapKit with annotations
+- Implement join game logic
 
 ### [BONUS] Interactive Prototype
 
