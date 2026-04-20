@@ -14,32 +14,25 @@ struct MainTabView: View {
     var body: some View {
         TabView {
 
-            Text("Map Screen")
+            MapView()
                 .tabItem {
                     Label("Map", systemImage: "map")
                 }
 
-            Text("List Screen")
+            ListView()
                 .tabItem {
                     Label("List", systemImage: "list.bullet")
                 }
 
-            Text("Create Screen")
+            CreateView()
                 .tabItem {
                     Label("Create", systemImage: "plus.circle")
                 }
 
-            VStack {
-                Text("Profile Screen")
-
-                Button("Log Out") {
-                    try? Auth.auth().signOut()
-                    isLoggedIn = false
+            ProfileView(isLoggedIn: $isLoggedIn)
+                .tabItem {
+                    Label("Profile", systemImage: "person")
                 }
-            }
-            .tabItem {
-                Label("Profile", systemImage: "person")
-            }
         }
     }
 }
