@@ -115,8 +115,9 @@ Here's the wireframe diagram from Figma:
 
 https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 
-### Progress Video
+### Progress Video For Sprint 1
 https://www.loom.com/share/4cbef110d1ab4e819631d96daa7384d5
+https://youtube.com/shorts/-gj1ybMOnmA
 
 ## Schema 
 
@@ -186,7 +187,3 @@ Profile Screen
 Optional Chat
 - [POST] /classes/Message - send a message
 - [GET] /classes/Message - retrieve chat messages for a game
-
-**Sprint 1 Video**
-
-https://youtube.com/shorts/-gj1ybMOnmA
