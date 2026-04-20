@@ -183,3 +183,7 @@ Profile Screen
 Optional Chat
 - [POST] /classes/Message - send a message
 - [GET] /classes/Message - retrieve chat messages for a game
+
+**Sprint 1 Video**
+
+https://youtube.com/shorts/-gj1ybMOnmA
