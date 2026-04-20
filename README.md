@@ -43,23 +43,23 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 ### 2. Screen Archetypes
 
 - [X] Login / Register Screen
-- [ ] User can sign up or log in to their account.
+- [X] User can sign up or log in to their account.
 - [X] Map View (Home)
 - [ ] User can see pins of nearby games and filter by sport.
 - [ ] Stream/List View
-- [ ] User can scroll through a list of upcoming games sorted by time or proximity.
-- [ ] Creation Screen
-- [ ] User can fill out a form to host a new game.
+- [X] User can scroll through a list of upcoming games sorted by time or proximity.
+- [X] Creation Screen
+- [X] User can fill out a form to host a new game.
 - [ ] Detail View
-- [ ] User can see specific game details (who is playing, exact location, rules).
-- [ ] Profile Screen
+- [X] User can see specific game details (who is playing, exact location, rules).
+- [X] Profile Screen
 - [ ] User can see their stats, bio, and history of games played.
 
 ### 3. Navigation
 
-- [ ] Tab Navigation (Tab to Screen)
-- [ ] Map: Browse games geographically.
-- [ ] List: Browse games chronologically.
+- [X] Tab Navigation (Tab to Screen)
+- [X] Map: Browse games geographically.
+- [X] List: Browse games chronologically.
 - [ ] Create: Host a new game.
 - [ ] Profile: Manage user settings and history.
   
@@ -114,6 +114,9 @@ Here's the wireframe diagram from Figma:
 ### [BONUS] Interactive Prototype
 
 https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
+
+### Progress Video
+https://www.loom.com/share/4cbef110d1ab4e819631d96daa7384d5
 
 ## Schema 
 
