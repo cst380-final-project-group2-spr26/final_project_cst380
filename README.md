@@ -28,47 +28,47 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 
 **Required Must-have Stories**
 
-- User can register a new account and log in.
-- User can view a Map/List of nearby pickup games.
-- User can create a new game lobby (specifying sport, time, location, and difficulty).
-- User can "Join" a game lobby to notify the host.
-- User can view their profile and a list of games they are attending.
+- [X] User can register a new account and log in.
+- [X] User can view a Map/List of nearby pickup games.
+- [ ] User can create a new game lobby (specifying sport, time, location, and difficulty).
+- [ ] User can "Join" a game lobby to notify the host.
+- [ ] User can view their profile and a list of games they are attending.
 
 **Optional Nice-to-have Stories**
 
-- User can chat with other participants in a specific game lobby.
-- User can rate other players' skill levels or sportsmanship.
-- User receives a push notification 30 minutes before a game starts.
+- [ ] User can chat with other participants in a specific game lobby.
+- [ ] User can rate other players' skill levels or sportsmanship.
+- [ ] User receives a push notification 30 minutes before a game starts.
 
 ### 2. Screen Archetypes
 
-- Login / Register Screen
-- User can sign up or log in to their account.
-- Map View (Home)
-- User can see pins of nearby games and filter by sport.
-- Stream/List View
-- User can scroll through a list of upcoming games sorted by time or proximity.
-- Creation Screen
-- User can fill out a form to host a new game.
-- Detail View
-- User can see specific game details (who is playing, exact location, rules).
-- Profile Screen
-- User can see their stats, bio, and history of games played.
+- [X] Login / Register Screen
+- [ ] User can sign up or log in to their account.
+- [X] Map View (Home)
+- [ ] User can see pins of nearby games and filter by sport.
+- [ ] Stream/List View
+- [ ] User can scroll through a list of upcoming games sorted by time or proximity.
+- [ ] Creation Screen
+- [ ] User can fill out a form to host a new game.
+- [ ] Detail View
+- [ ] User can see specific game details (who is playing, exact location, rules).
+- [ ] Profile Screen
+- [ ] User can see their stats, bio, and history of games played.
 
 ### 3. Navigation
 
-- Tab Navigation (Tab to Screen)
-- Map: Browse games geographically.
-- List: Browse games chronologically.
-- Create: Host a new game.
-- Profile: Manage user settings and history.
+- [ ] Tab Navigation (Tab to Screen)
+- [ ] Map: Browse games geographically.
+- [ ] List: Browse games chronologically.
+- [ ] Create: Host a new game.
+- [ ] Profile: Manage user settings and history.
   
 **Flow Navigation** (Screen to Screen)
-- Map/List View * Leads to Detail View when a game is selected.
-- Detail View
-- Leads back to Map/List or stays on page after "Join" is clicked.
-- Creation Screen
-- Leads to Map/List after the game is successfully posted.
+- [ ] Map/List View * Leads to Detail View when a game is selected.
+- [ ] Detail View
+- [ ] Leads back to Map/List or stays on page after "Join" is clicked.
+- [ ] Creation Screen
+- [ ] Leads to Map/List after the game is successfully posted.
 
 - ## Wireframes
 
