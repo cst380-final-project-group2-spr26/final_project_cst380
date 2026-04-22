@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FF4D0C572F996F8B001A2AF6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */; };
 		FFFEAA1E2F943E3600C691F6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FFFEAA1D2F943E3600C691F6 /* GoogleService-Info.plist */; };
 		FFFEAA212F944BD900C691F6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FFFEAA202F944BD900C691F6 /* FirebaseAuth */; };
 		FFFEAA232F944BD900C691F6 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FFFEAA222F944BD900C691F6 /* FirebaseCore */; };
@@ -32,6 +33,7 @@
 			files = (
 				FFFEAA232F944BD900C691F6 /* FirebaseCore in Frameworks */,
 				FFFEAA212F944BD900C691F6 /* FirebaseAuth in Frameworks */,
+				FF4D0C572F996F8B001A2AF6 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +79,7 @@
 			packageProductDependencies = (
 				FFFEAA202F944BD900C691F6 /* FirebaseAuth */,
 				FFFEAA222F944BD900C691F6 /* FirebaseCore */,
+				FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */,
 			);
 			productName = SportsBuddyFinder;
 			productReference = FFFEAA0C2F94274600C691F6 /* SportsBuddyFinder.app */;
@@ -353,6 +356,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FFFEAA1F2F944BD900C691F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		FFFEAA202F944BD900C691F6 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FFFEAA1F2F944BD900C691F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

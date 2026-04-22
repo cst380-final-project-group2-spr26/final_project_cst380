@@ -7,10 +7,12 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct RegisterView: View {
     @Binding var isLoggedIn: Bool
 
+    @State private var username = ""
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -19,16 +21,14 @@ struct RegisterView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                //background
                 LinearGradient(
-                    colors: [Color.purple, Color.blue],
+                    colors: [Color.blue, Color.purple],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
 
                 VStack {
-                    //header
                     VStack(spacing: 8) {
                         Image(systemName: "figure.run")
                             .font(.system(size: 30))
@@ -43,14 +43,15 @@ struct RegisterView: View {
 
                     Spacer()
 
-                    // 💎 REGISTER CARD
                     VStack(spacing: 20) {
                         Text("Create Account")
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text("Join and find your sports buddy")
+                        Text("Sign up to get started")
                             .foregroundColor(.gray)
+
+                        AuthTextField(placeholder: "Username", text: $username)
 
                         AuthTextField(placeholder: "Email", text: $email)
                             .keyboardType(.emailAddress)
@@ -64,15 +65,14 @@ struct RegisterView: View {
                             Text("Sign Up")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.purple)
+                                .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(12)
                         }
-
+                        
                         NavigationLink("Already have an account? Log In") {
-                            LoginView(isLoggedIn: $isLoggedIn)
-                        }
-                        .font(.footnote)
+                                LoginView(isLoggedIn: $isLoggedIn)
+                        }.font(.footnote)
 
                         if !message.isEmpty {
                             Text(message)
@@ -93,9 +93,14 @@ struct RegisterView: View {
         }
     }
 
-    //Firebase Signup
     func signUp() {
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedUsername.isEmpty else {
+            message = "Please enter a username."
+            return
+        }
 
         guard !trimmedEmail.isEmpty else {
             message = "Please enter an email."
@@ -118,8 +123,28 @@ struct RegisterView: View {
                 return
             }
 
-            message = ""
-            isLoggedIn = true
+            guard let uid = result?.user.uid else {
+                message = "Could not get user ID."
+                return
+            }
+
+            let db = Firestore.firestore()
+
+            db.collection("users").document(uid).setData([
+                "username": trimmedUsername,
+                "email": trimmedEmail,
+                "bio": "",
+                "skillLevel": "Beginner",
+                "createdAt": Timestamp(date: Date())
+            ]) { error in
+                if let error = error {
+                    message = error.localizedDescription
+                    return
+                }
+
+                message = ""
+                isLoggedIn = true
+            }
         }
     }
 }
