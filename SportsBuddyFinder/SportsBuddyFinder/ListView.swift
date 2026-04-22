@@ -7,39 +7,86 @@
 
 import SwiftUI
 
-
 struct ListView: View {
+    let events = SportsEvent.sampleEvents
+
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color.blue, Color.purple],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                LinearGradient(
+                    colors: [Color.blue, Color.purple],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-            VStack(spacing: 15) {
-                Text("Available Games")
-                    .font(.title)
-                    .foregroundColor(.white)
+                ScrollView {
+                    VStack(spacing: 16) {
+                        Text("Available Games")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.top)
 
-                ForEach(1...3, id: \.self) { i in
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white)
-                        .frame(height: 70)
-                        .overlay(
-                            VStack {
-                                Text("Game \(i)")
-                                Text("5:00 PM • Park")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                        )
+                        ForEach(events) { event in
+                            eventRow(for: event)
+                        }
+                    }
+                    .padding()
                 }
-
-                Spacer()
             }
-            .padding()
+            .navigationBarHidden(true)
         }
     }
+
+    private func eventRow(for event: SportsEvent) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(event.title)
+                    .font(.headline)
+
+                Spacer()
+
+                Text(event.sport)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(10)
+            }
+
+            Label(event.time, systemImage: "clock")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Label(event.locationName, systemImage: "mappin.and.ellipse")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            HStack {
+                Text(event.skillLevel)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.blue.opacity(0.12))
+                    .cornerRadius(8)
+
+                Spacer()
+
+                Text("\(event.spotsLeft) spots left")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(18)
+        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
+    }
+}
+
+#Preview {
+    ListView()
 }
