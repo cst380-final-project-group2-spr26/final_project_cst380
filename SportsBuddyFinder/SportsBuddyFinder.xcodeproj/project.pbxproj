@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FF4D0C572F996F8B001A2AF6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */; };
+		734FBD282F99BB2A00582A26 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 734FBD272F99BB2A00582A26 /* FirebaseFirestore */; };
 		FFFEAA1E2F943E3600C691F6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FFFEAA1D2F943E3600C691F6 /* GoogleService-Info.plist */; };
 		FFFEAA212F944BD900C691F6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FFFEAA202F944BD900C691F6 /* FirebaseAuth */; };
 		FFFEAA232F944BD900C691F6 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FFFEAA222F944BD900C691F6 /* FirebaseCore */; };
@@ -33,19 +33,27 @@
 			files = (
 				FFFEAA232F944BD900C691F6 /* FirebaseCore in Frameworks */,
 				FFFEAA212F944BD900C691F6 /* FirebaseAuth in Frameworks */,
-				FF4D0C572F996F8B001A2AF6 /* FirebaseFirestore in Frameworks */,
+				734FBD282F99BB2A00582A26 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		734FBD262F99BAC300582A26 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FFFEAA032F94274600C691F6 = {
 			isa = PBXGroup;
 			children = (
 				FFFEAA0E2F94274600C691F6 /* SportsBuddyFinder */,
 				FFFEAA0D2F94274600C691F6 /* Products */,
 				FFFEAA1D2F943E3600C691F6 /* GoogleService-Info.plist */,
+				734FBD262F99BAC300582A26 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,7 +87,7 @@
 			packageProductDependencies = (
 				FFFEAA202F944BD900C691F6 /* FirebaseAuth */,
 				FFFEAA222F944BD900C691F6 /* FirebaseCore */,
-				FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */,
+				734FBD272F99BB2A00582A26 /* FirebaseFirestore */,
 			);
 			productName = SportsBuddyFinder;
 			productReference = FFFEAA0C2F94274600C691F6 /* SportsBuddyFinder.app */;
@@ -271,7 +279,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SportsBuddyFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3U49DKTY7Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -300,7 +307,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SportsBuddyFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3U49DKTY7Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -356,7 +362,7 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FF4D0C562F996F8B001A2AF6 /* FirebaseFirestore */ = {
+		734FBD272F99BB2A00582A26 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FFFEAA1F2F944BD900C691F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
