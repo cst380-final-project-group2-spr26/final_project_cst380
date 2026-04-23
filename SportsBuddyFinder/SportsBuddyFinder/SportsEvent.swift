@@ -9,7 +9,7 @@ import Foundation
 import MapKit
 
 struct SportsEvent: Identifiable, Equatable {
-    let id = UUID()
+    let id: String
     let title: String
     let sport: String
     let time: String
@@ -26,6 +26,7 @@ struct SportsEvent: Identifiable, Equatable {
 extension SportsEvent {
     static let sampleEvents: [SportsEvent] = [
         SportsEvent(
+            id: UUID().uuidString,
             title: "Open Gym Hoops",
             sport: "Basketball",
             time: "Today · 6:00 PM",
@@ -35,6 +36,7 @@ extension SportsEvent {
             coordinate: CLLocationCoordinate2D(latitude: 36.6525, longitude: -121.7978)
         ),
         SportsEvent(
+            id: UUID().uuidString,
             title: "Sunset Soccer Run",
             sport: "Soccer",
             time: "Today · 7:15 PM",
@@ -44,6 +46,7 @@ extension SportsEvent {
             coordinate: CLLocationCoordinate2D(latitude: 36.6509, longitude: -121.8012)
         ),
         SportsEvent(
+            id: UUID().uuidString,
             title: "Morning Tennis Rally",
             sport: "Tennis",
             time: "Tomorrow · 9:00 AM",
@@ -53,6 +56,7 @@ extension SportsEvent {
             coordinate: CLLocationCoordinate2D(latitude: 36.6534, longitude: -121.8001)
         ),
         SportsEvent(
+            id: UUID().uuidString,
             title: "Flag Football Meetup",
             sport: "Football",
             time: "Saturday · 11:30 AM",

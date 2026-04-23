@@ -15,7 +15,7 @@ struct MapView: View {
     )
 
     @State private var selectedEvent: SportsEvent?
-    @State private var joinedEvents: Set<UUID> = []
+    @State private var joinedEvents: Set<String> = []
 
     let events = SportsEvent.sampleEvents
 

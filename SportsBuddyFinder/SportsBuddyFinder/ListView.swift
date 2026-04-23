@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ListView: View {
-    let events = SportsEvent.sampleEvents
+    @State private var events: [SportsEvent] = []
+    @State private var message = ""
 
     var body: some View {
         NavigationStack {
@@ -28,14 +29,41 @@ struct ListView: View {
                             .foregroundColor(.white)
                             .padding(.top)
 
-                        ForEach(events) { event in
-                            eventRow(for: event)
+                        if !message.isEmpty {
+                            Text(message)
+                                .foregroundColor(.white)
+                                .font(.caption)
+                        }
+
+                        if events.isEmpty {
+                            Text("No games available yet.")
+                                .foregroundColor(.white.opacity(0.85))
+                                .padding(.top, 40)
+                        } else {
+                            ForEach(events) { event in
+                                eventRow(for: event)
+                            }
                         }
                     }
                     .padding()
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                loadGames()
+            }
+        }
+    }
+
+    private func loadGames() {
+        GameService.shared.fetchGames { result in
+            switch result {
+            case .success(let loadedEvents):
+                events = loadedEvents
+                message = ""
+            case .failure(let error):
+                message = error.localizedDescription
+            }
         }
     }
 
