@@ -17,6 +17,7 @@ struct SportsEvent: Identifiable, Equatable {
     let skillLevel: String
     let spotsLeft: Int
     let coordinate: CLLocationCoordinate2D
+    let hostUid: String?
 
     static func == (lhs: SportsEvent, rhs: SportsEvent) -> Bool {
         lhs.id == rhs.id
@@ -33,7 +34,8 @@ extension SportsEvent {
             locationName: "Otter Sports Center",
             skillLevel: "Intermediate",
             spotsLeft: 4,
-            coordinate: CLLocationCoordinate2D(latitude: 36.6525, longitude: -121.7978)
+            coordinate: CLLocationCoordinate2D(latitude: 36.6525, longitude: -121.7978),
+            hostUid: nil
         ),
         SportsEvent(
             id: UUID().uuidString,
@@ -43,7 +45,8 @@ extension SportsEvent {
             locationName: "CSUMB Recreation Field",
             skillLevel: "Beginner Friendly",
             spotsLeft: 9,
-            coordinate: CLLocationCoordinate2D(latitude: 36.6509, longitude: -121.8012)
+            coordinate: CLLocationCoordinate2D(latitude: 36.6509, longitude: -121.8012),
+            hostUid: nil
         ),
         SportsEvent(
             id: UUID().uuidString,
@@ -53,7 +56,8 @@ extension SportsEvent {
             locationName: "CSUMB Tennis Courts",
             skillLevel: "All Levels",
             spotsLeft: 2,
-            coordinate: CLLocationCoordinate2D(latitude: 36.6534, longitude: -121.8001)
+            coordinate: CLLocationCoordinate2D(latitude: 36.6534, longitude: -121.8001),
+            hostUid: nil
         ),
         SportsEvent(
             id: UUID().uuidString,
@@ -63,7 +67,8 @@ extension SportsEvent {
             locationName: "Main Athletic Field",
             skillLevel: "Casual",
             spotsLeft: 12,
-            coordinate: CLLocationCoordinate2D(latitude: 36.6516, longitude: -121.8030)
+            coordinate: CLLocationCoordinate2D(latitude: 36.6516, longitude: -121.8030),
+            hostUid: nil
         )
     ]
 }

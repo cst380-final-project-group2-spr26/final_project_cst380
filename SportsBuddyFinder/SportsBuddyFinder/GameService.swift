@@ -17,6 +17,10 @@ final class GameService {
 
     private init() {}
 
+    private var usersCollection: CollectionReference {
+        db.collection("users")
+    }
+
     func createGame(
         sport: String,
         gameDate: Date,
@@ -41,6 +45,7 @@ final class GameService {
             "locationName": locationName,
             "skillLevel": "All Levels",
             "spotsLeft": 10,
+            "maxPlayers": 10,
             "latitude": latitude,
             "longitude": longitude,
             "hostUid": uid,
@@ -86,11 +91,101 @@ final class GameService {
                         locationName: locationName,
                         skillLevel: skillLevel,
                         spotsLeft: spotsLeft,
-                        coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                        coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                        hostUid: data["hostUid"] as? String
                     )
                 } ?? []
 
                 completion(.success(events))
             }
+    }
+
+    func fetchJoinedGameIDs(completion: @escaping (Result<Set<String>, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.success([]))
+            return
+        }
+
+        usersCollection
+            .document(uid)
+            .collection("joinedGames")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                let joinedGameIDs = Set(snapshot?.documents.map(\.documentID) ?? [])
+                completion(.success(joinedGameIDs))
+            }
+    }
+
+    func joinGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(NSError(domain: "GameService", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "No logged in user."
+            ]))
+            return
+        }
+
+        if event.hostUid == uid {
+            completion(NSError(domain: "GameService", code: 2, userInfo: [
+                NSLocalizedDescriptionKey: "You already host this game."
+            ]))
+            return
+        }
+
+        let gameRef = db.collection("games").document(event.id)
+        let attendeeRef = gameRef.collection("attendees").document(uid)
+        let joinedGameRef = usersCollection.document(uid).collection("joinedGames").document(event.id)
+
+        db.runTransaction({ transaction, errorPointer in
+            let snapshot: DocumentSnapshot
+
+            do {
+                snapshot = try transaction.getDocument(gameRef)
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+
+            if snapshot.data() == nil {
+                errorPointer?.pointee = NSError(domain: "GameService", code: 3, userInfo: [
+                    NSLocalizedDescriptionKey: "This game no longer exists."
+                ])
+                return nil
+            }
+
+            if let attendeeSnapshot = try? transaction.getDocument(attendeeRef),
+               attendeeSnapshot.exists {
+                return nil
+            }
+
+            let spotsLeft = snapshot.data()?["spotsLeft"] as? Int ?? 0
+            if spotsLeft <= 0 {
+                errorPointer?.pointee = NSError(domain: "GameService", code: 4, userInfo: [
+                    NSLocalizedDescriptionKey: "This game is already full."
+                ])
+                return nil
+            }
+
+            transaction.updateData([
+                "spotsLeft": spotsLeft - 1
+            ], forDocument: gameRef)
+
+            transaction.setData([
+                "joinedAt": Timestamp(date: Date())
+            ], forDocument: attendeeRef)
+
+            transaction.setData([
+                "joinedAt": Timestamp(date: Date()),
+                "gameTitle": event.title,
+                "sport": event.sport
+            ], forDocument: joinedGameRef)
+
+            return nil
+        }) { _, error in
+            completion(error)
+        }
     }
 }
