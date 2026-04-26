@@ -100,92 +100,211 @@ final class GameService {
             }
     }
 
-    func fetchJoinedGameIDs(completion: @escaping (Result<Set<String>, Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.success([]))
-            return
-        }
+//    func fetchJoinedGameIDs(completion: @escaping (Result<Set<String>, Error>) -> Void) {
+//        guard let uid = Auth.auth().currentUser?.uid else {
+//            completion(.success([]))
+//            return
+//        }
+//
+//        usersCollection
+//            .document(uid)
+//            .collection("joinedGames")
+//            .getDocuments { snapshot, error in
+//                if let error = error {
+//                    completion(.failure(error))
+//                    return
+//                }
+//
+//                let joinedGameIDs = Set(snapshot?.documents.map(\.documentID) ?? [])
+//                completion(.success(joinedGameIDs))
+//            }
+//    }
 
-        usersCollection
-            .document(uid)
-            .collection("joinedGames")
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
+//    func joinGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
+//        guard let uid = Auth.auth().currentUser?.uid else {
+//            completion(NSError(domain: "GameService", code: 1, userInfo: [
+//                NSLocalizedDescriptionKey: "No logged in user."
+//            ]))
+//            return
+//        }
+//
+//        if event.hostUid == uid {
+//            completion(NSError(domain: "GameService", code: 2, userInfo: [
+//                NSLocalizedDescriptionKey: "You already host this game."
+//            ]))
+//            return
+//        }
+//
+//        let gameRef = db.collection("games").document(event.id)
+//        let attendeeRef = gameRef.collection("attendees").document(uid)
+//        let joinedGameRef = usersCollection.document(uid).collection("joinedGames").document(event.id)
+//
+//        db.runTransaction({ transaction, errorPointer in
+//            let snapshot: DocumentSnapshot
+//
+//            do {
+//                snapshot = try transaction.getDocument(gameRef)
+//            } catch {
+//                errorPointer?.pointee = error as NSError
+//                return nil
+//            }
+//
+//            if snapshot.data() == nil {
+//                errorPointer?.pointee = NSError(domain: "GameService", code: 3, userInfo: [
+//                    NSLocalizedDescriptionKey: "This game no longer exists."
+//                ])
+//                return nil
+//            }
+//
+//            if let attendeeSnapshot = try? transaction.getDocument(attendeeRef),
+//               attendeeSnapshot.exists {
+//                return nil
+//            }
+//
+//            let spotsLeft = snapshot.data()?["spotsLeft"] as? Int ?? 0
+//            if spotsLeft <= 0 {
+//                errorPointer?.pointee = NSError(domain: "GameService", code: 4, userInfo: [
+//                    NSLocalizedDescriptionKey: "This game is already full."
+//                ])
+//                return nil
+//            }
+//
+//            transaction.updateData([
+//                "spotsLeft": spotsLeft - 1
+//            ], forDocument: gameRef)
+//
+//            transaction.setData([
+//                "joinedAt": Timestamp(date: Date())
+//            ], forDocument: attendeeRef)
+//
+//            transaction.setData([
+//                "joinedAt": Timestamp(date: Date()),
+//                "gameTitle": event.title,
+//                "sport": event.sport
+//            ], forDocument: joinedGameRef)
+//
+//            return nil
+//        }) { _, error in
+//            completion(error)
+//        }
+//    }
+    
+    func leaveGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
-                let joinedGameIDs = Set(snapshot?.documents.map(\.documentID) ?? [])
-                completion(.success(joinedGameIDs))
-            }
-    }
-
-    func joinGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(NSError(domain: "GameService", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "No logged in user."
-            ]))
-            return
-        }
-
-        if event.hostUid == uid {
-            completion(NSError(domain: "GameService", code: 2, userInfo: [
-                NSLocalizedDescriptionKey: "You already host this game."
-            ]))
-            return
-        }
-
+        let db = Firestore.firestore()
         let gameRef = db.collection("games").document(event.id)
-        let attendeeRef = gameRef.collection("attendees").document(uid)
-        let joinedGameRef = usersCollection.document(uid).collection("joinedGames").document(event.id)
 
-        db.runTransaction({ transaction, errorPointer in
-            let snapshot: DocumentSnapshot
+        let attendeeRef = gameRef
+            .collection("attendees")
+            .document(uid)
 
+        db.runTransaction { transaction, errorPointer in
+            let gameDoc: DocumentSnapshot
             do {
-                snapshot = try transaction.getDocument(gameRef)
+                gameDoc = try transaction.getDocument(gameRef)
             } catch {
-                errorPointer?.pointee = error as NSError
                 return nil
             }
 
-            if snapshot.data() == nil {
-                errorPointer?.pointee = NSError(domain: "GameService", code: 3, userInfo: [
-                    NSLocalizedDescriptionKey: "This game no longer exists."
-                ])
-                return nil
-            }
+            let currentSpots = gameDoc.data()?["spotsLeft"] as? Int ?? 0
 
-            if let attendeeSnapshot = try? transaction.getDocument(attendeeRef),
-               attendeeSnapshot.exists {
-                return nil
-            }
+            // 1. Delete attendee
+            transaction.deleteDocument(attendeeRef)
 
-            let spotsLeft = snapshot.data()?["spotsLeft"] as? Int ?? 0
-            if spotsLeft <= 0 {
-                errorPointer?.pointee = NSError(domain: "GameService", code: 4, userInfo: [
-                    NSLocalizedDescriptionKey: "This game is already full."
-                ])
-                return nil
-            }
-
+            // 2. Increase spots
             transaction.updateData([
-                "spotsLeft": spotsLeft - 1
+                "spotsLeft": currentSpots + 1
             ], forDocument: gameRef)
 
+            return nil
+
+        } completion: { _, error in
+            if let error = error {
+                print("Transaction failed:", error.localizedDescription)
+            } else {
+                print("Leave successful")
+            }
+            completion(error)
+        }
+    }
+    
+    func joinGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+        let gameRef = db.collection("games").document(event.id)
+
+        let attendeeRef = gameRef
+            .collection("attendees")
+            .document(uid)
+
+        db.runTransaction { transaction, errorPointer in
+            let gameDoc: DocumentSnapshot
+            do {
+                gameDoc = try transaction.getDocument(gameRef)
+            } catch {
+                return nil
+            }
+
+            let currentSpots = gameDoc.data()?["spotsLeft"] as? Int ?? 0
+
+            if currentSpots <= 0 {
+                return nil
+            }
+
+            // Add attendee
             transaction.setData([
-                "joinedAt": Timestamp(date: Date())
+                "joinedAt": Timestamp()
             ], forDocument: attendeeRef)
 
-            transaction.setData([
-                "joinedAt": Timestamp(date: Date()),
-                "gameTitle": event.title,
-                "sport": event.sport
-            ], forDocument: joinedGameRef)
+            // Decrease spots
+            transaction.updateData([
+                "spotsLeft": currentSpots - 1
+            ], forDocument: gameRef)
 
             return nil
-        }) { _, error in
+
+        } completion: { _, error in
             completion(error)
+        }
+    }
+    
+    func fetchJoinedGameIDs(completion: @escaping (Result<Set<String>, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+
+        db.collection("games").getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            var joinedIDs: Set<String> = []
+
+            let group = DispatchGroup()
+
+            snapshot?.documents.forEach { doc in
+                group.enter()
+
+                db.collection("games")
+                    .document(doc.documentID)
+                    .collection("attendees")
+                    .document(uid)
+                    .getDocument { attendeeDoc, _ in
+
+                        if attendeeDoc?.exists == true {
+                            joinedIDs.insert(doc.documentID)
+                        }
+
+                        group.leave()
+                    }
+            }
+
+            group.notify(queue: .main) {
+                completion(.success(joinedIDs))
+            }
         }
     }
 }

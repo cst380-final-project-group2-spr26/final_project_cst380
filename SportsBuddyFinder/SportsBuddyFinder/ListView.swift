@@ -44,7 +44,44 @@ struct ListView: View {
                                 .padding(.top, 40)
                         } else {
                             ForEach(events) { event in
-                                eventRow(for: event)
+                                NavigationLink(
+                                    destination: GameDetailView(
+                                        event: event,
+                                        isJoined: Binding(
+                                            get: {
+                                                joinedGameIDs.contains(event.id)
+                                            },
+                                            set: { newValue in
+                                                if newValue {
+                                                    joinedGameIDs.insert(event.id)
+                                                } else {
+                                                    joinedGameIDs.remove(event.id)
+                                                }
+                                            }
+                                        ),
+                                        onStatusChange: {
+                                            joinedGameIDs.remove(event.id)
+
+                                                if let index = events.firstIndex(where: { $0.id == event.id }) {
+                                                    let updatedEvent = SportsEvent(
+                                                        id: events[index].id,
+                                                        title: events[index].title,
+                                                        sport: events[index].sport,
+                                                        time: events[index].time,
+                                                        locationName: events[index].locationName,
+                                                        skillLevel: events[index].skillLevel,
+                                                        spotsLeft: events[index].spotsLeft + 1,
+                                                        coordinate: events[index].coordinate,
+                                                        hostUid: events[index].hostUid
+                                                    )
+                                                    events[index] = updatedEvent
+                                                }
+                                        }
+                                    )
+                                ) {
+                                    eventRow(for: event)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -54,6 +91,9 @@ struct ListView: View {
             .navigationBarHidden(true)
             .onAppear {
                 loadData()
+            }
+            .onChange(of: joinedGameIDs) { _ in
+                loadGames()
             }
             .refreshable {
                 loadData()
@@ -84,6 +124,7 @@ struct ListView: View {
         GameService.shared.fetchJoinedGameIDs { result in
             switch result {
             case .success(let ids):
+                print("Joined IDs:", ids)
                 joinedGameIDs = ids
             case .failure(let error):
                 message = error.localizedDescription

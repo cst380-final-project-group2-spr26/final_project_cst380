@@ -163,6 +163,12 @@ struct MapView: View {
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
         .scaleEffect(isSelected ? 1.02 : 1.0)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.clear, lineWidth: 0)
+        )
+        .scaleEffect(1.0)
     }
 
     private func selectedEventPanel(for event: SportsEvent) -> some View {
