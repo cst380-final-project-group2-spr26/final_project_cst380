@@ -21,6 +21,40 @@ final class GameService {
         db.collection("users")
     }
 
+    private func event(from document: QueryDocumentSnapshot) -> SportsEvent {
+        event(id: document.documentID, data: document.data())
+    }
+
+    private func event(id: String, data: [String: Any]) -> SportsEvent {
+        let title = data["title"] as? String ?? "Untitled Game"
+        let sport = data["sport"] as? String ?? "Unknown Sport"
+        let locationName = data["locationName"] as? String ?? "Unknown Location"
+        let skillLevel = data["skillLevel"] as? String ?? "All Levels"
+        let spotsLeft = data["spotsLeft"] as? Int ?? 0
+        let latitude = data["latitude"] as? Double ?? 36.6522
+        let longitude = data["longitude"] as? Double ?? -121.7989
+
+        let timestamp = data["gameDate"] as? Timestamp ?? Timestamp(date: Date())
+        let date = timestamp.dateValue()
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        let formattedDate = formatter.string(from: date)
+
+        return SportsEvent(
+            id: id,
+            title: title,
+            sport: sport,
+            time: formattedDate,
+            locationName: locationName,
+            skillLevel: skillLevel,
+            spotsLeft: spotsLeft,
+            coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+            hostUid: data["hostUid"] as? String
+        )
+    }
+
     func createGame(
         sport: String,
         gameDate: Date,
@@ -64,37 +98,7 @@ final class GameService {
                     return
                 }
 
-                let events: [SportsEvent] = snapshot?.documents.compactMap { doc in
-                    let data = doc.data()
-
-                    let title = data["title"] as? String ?? "Untitled Game"
-                    let sport = data["sport"] as? String ?? "Unknown Sport"
-                    let locationName = data["locationName"] as? String ?? "Unknown Location"
-                    let skillLevel = data["skillLevel"] as? String ?? "All Levels"
-                    let spotsLeft = data["spotsLeft"] as? Int ?? 0
-                    let latitude = data["latitude"] as? Double ?? 36.6522
-                    let longitude = data["longitude"] as? Double ?? -121.7989
-
-                    let timestamp = data["gameDate"] as? Timestamp ?? Timestamp(date: Date())
-                    let date = timestamp.dateValue()
-
-                    let formatter = DateFormatter()
-                    formatter.dateStyle = .medium
-                    formatter.timeStyle = .short
-                    let formattedDate = formatter.string(from: date)
-
-                    return SportsEvent(
-                        id: doc.documentID,
-                        title: title,
-                        sport: sport,
-                        time: formattedDate,
-                        locationName: locationName,
-                        skillLevel: skillLevel,
-                        spotsLeft: spotsLeft,
-                        coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
-                        hostUid: data["hostUid"] as? String
-                    )
-                } ?? []
+                let events = snapshot?.documents.map { self.event(from: $0) } ?? []
 
                 completion(.success(events))
             }
@@ -187,5 +191,67 @@ final class GameService {
         }) { _, error in
             completion(error)
         }
+    }
+
+    func listenToJoinedGames(completion: @escaping (Result<[SportsEvent], Error>) -> Void) -> ListenerRegistration? {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.success([]))
+            return nil
+        }
+
+        return usersCollection
+            .document(uid)
+            .collection("joinedGames")
+            .order(by: "joinedAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                let joinedDocuments = snapshot?.documents ?? []
+
+                guard !joinedDocuments.isEmpty else {
+                    completion(.success([]))
+                    return
+                }
+
+                var eventsByID: [String: SportsEvent] = [:]
+                var firstError: Error?
+                let resultsQueue = DispatchQueue(label: "GameService.joinedGamesResults")
+                let group = DispatchGroup()
+
+                for joinedDocument in joinedDocuments {
+                    group.enter()
+
+                    self.db.collection("games").document(joinedDocument.documentID).getDocument { gameSnapshot, error in
+                        resultsQueue.async {
+                            defer { group.leave() }
+
+                            if let error = error {
+                                firstError = firstError ?? error
+                                return
+                            }
+
+                            guard let gameSnapshot,
+                                  let data = gameSnapshot.data() else {
+                                return
+                            }
+
+                            eventsByID[joinedDocument.documentID] = self.event(id: gameSnapshot.documentID, data: data)
+                        }
+                    }
+                }
+
+                group.notify(queue: .main) {
+                    if let firstError {
+                        completion(.failure(firstError))
+                        return
+                    }
+
+                    let events = joinedDocuments.compactMap { eventsByID[$0.documentID] }
+                    completion(.success(events))
+                }
+            }
     }
 }
