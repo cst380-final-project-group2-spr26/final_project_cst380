@@ -42,7 +42,29 @@ struct ListView: View {
                                 .padding(.top, 40)
                         } else {
                             ForEach(eventStore.events) { event in
-                                eventRow(for: event)
+                                NavigationLink(
+                                        destination: GameDetailView(
+                                            event: event,
+                                            isJoined: Binding(
+                                                get: {
+                                                    eventStore.joinedGameIDs.contains(event.id)
+                                                },
+                                                set: { newValue in
+                                                    if newValue {
+                                                        eventStore.joinedGameIDs.insert(event.id)
+                                                    } else {
+                                                        eventStore.joinedGameIDs.remove(event.id)
+                                                    }
+                                                }
+                                            ),
+                                            onStatusChange: {
+                                                // DO NOTHING (EventStore already updates everything)
+                                            }
+                                        )
+                                    ) {
+                                        eventRow(for: event)
+                                    }
+                                    .buttonStyle(.plain)
                             }
                         }
                     }
