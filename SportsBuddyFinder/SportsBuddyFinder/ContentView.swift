@@ -10,11 +10,13 @@ import FirebaseAuth
 
 struct ContentView: View {
     @State private var isLoggedIn = Auth.auth().currentUser != nil
+    @StateObject private var eventStore = EventStore()
 
     var body: some View {
         Group {
             if isLoggedIn {
                 MainTabView(isLoggedIn: $isLoggedIn)
+                    .environmentObject(eventStore)
             } else {
                 LoginView(isLoggedIn: $isLoggedIn)
             }

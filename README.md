@@ -30,7 +30,7 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 
 - [X] User can register a new account and log in.
 - [X] User can view a Map/List of nearby pickup games.
-- [ ] User can create a new game lobby (specifying sport, time, location, and difficulty).
+- [X] User can create a new game lobby (specifying sport, time, location, and difficulty).
 - [ ] User can "Join" a game lobby to notify the host.
 - [ ] User can view their profile and a list of games they are attending.
 
@@ -50,7 +50,6 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - [X] User can scroll through a list of upcoming games sorted by time or proximity.
 - [X] Creation Screen
 - [X] User can fill out a form to host a new game.
-- [ ] Detail View
 - [X] User can see specific game details (who is playing, exact location, rules).
 - [X] Profile Screen
 - [ ] User can see their stats, bio, and history of games played.
@@ -60,15 +59,14 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - [X] Tab Navigation (Tab to Screen)
 - [X] Map: Browse games geographically.
 - [X] List: Browse games chronologically.
-- [ ] Create: Host a new game.
+- [X] Create: Host a new game.
 - [ ] Profile: Manage user settings and history.
   
 **Flow Navigation** (Screen to Screen)
-- [ ] Map/List View * Leads to Detail View when a game is selected.
-- [ ] Detail View
+- [X] Map/List View * Leads to Detail View when a game is selected.
 - [ ] Leads back to Map/List or stays on page after "Join" is clicked.
-- [ ] Creation Screen
-- [ ] Leads to Map/List after the game is successfully posted.
+- [X] Creation Screen
+- [X] Leads to Map/List after the game is successfully posted.
 
 - ## Wireframes
 
@@ -118,6 +116,9 @@ https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 ### Progress Video For Sprint 1
 https://www.loom.com/share/4cbef110d1ab4e819631d96daa7384d5
 https://youtube.com/shorts/-gj1ybMOnmA
+
+### Demo Day Demo Video
+https://youtu.be/G293ecqU6rg
 
 ## Schema 
 

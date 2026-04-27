@@ -9,10 +9,8 @@ import SwiftUI
 import FirebaseAuth
 
 struct ListView: View {
-    @State private var events: [SportsEvent] = []
-    @State private var joinedGameIDs: Set<String> = []
+    @EnvironmentObject private var eventStore: EventStore
     @State private var joiningGameIDs: Set<String> = []
-    @State private var message = ""
 
     var body: some View {
         NavigationStack {
@@ -32,18 +30,18 @@ struct ListView: View {
                             .foregroundColor(.white)
                             .padding(.top)
 
-                        if !message.isEmpty {
-                            Text(message)
+                        if !eventStore.message.isEmpty {
+                            Text(eventStore.message)
                                 .foregroundColor(.white)
                                 .font(.caption)
                         }
 
-                        if events.isEmpty {
+                        if eventStore.events.isEmpty {
                             Text("No games available yet.")
                                 .foregroundColor(.white.opacity(0.85))
                                 .padding(.top, 40)
                         } else {
-                            ForEach(events) { event in
+                            ForEach(eventStore.events) { event in
                                 eventRow(for: event)
                             }
                         }
@@ -53,40 +51,10 @@ struct ListView: View {
             }
             .navigationBarHidden(true)
             .onAppear {
-                loadData()
+                eventStore.start()
             }
             .refreshable {
-                loadData()
-            }
-        }
-    }
-
-    private func loadData() {
-        loadGames()
-        loadJoinedGames()
-    }
-
-    private func loadGames() {
-        GameService.shared.fetchGames { result in
-            switch result {
-            case .success(let loadedEvents):
-                events = loadedEvents
-                if !message.contains("join") {
-                    message = ""
-                }
-            case .failure(let error):
-                message = error.localizedDescription
-            }
-        }
-    }
-
-    private func loadJoinedGames() {
-        GameService.shared.fetchJoinedGameIDs { result in
-            switch result {
-            case .success(let ids):
-                joinedGameIDs = ids
-            case .failure(let error):
-                message = error.localizedDescription
+                eventStore.start()
             }
         }
     }
@@ -94,7 +62,7 @@ struct ListView: View {
     private func eventRow(for event: SportsEvent) -> some View {
         let currentUid = Auth.auth().currentUser?.uid
         let isHost = event.hostUid == currentUid
-        let isJoined = joinedGameIDs.contains(event.id)
+        let isJoined = eventStore.joinedGameIDs.contains(event.id)
         let isJoining = joiningGameIDs.contains(event.id)
         let canJoin = !isHost && !isJoined && !isJoining && event.spotsLeft > 0
 
@@ -179,37 +147,18 @@ struct ListView: View {
 
     private func joinGame(_ event: SportsEvent) {
         joiningGameIDs.insert(event.id)
-        message = ""
 
-        GameService.shared.joinGame(event: event) { error in
+        eventStore.message = ""
+        eventStore.joinGame(event) { error in
             joiningGameIDs.remove(event.id)
-
-            if let error = error {
-                message = error.localizedDescription
-                return
+            if let error {
+                eventStore.message = error.localizedDescription
             }
-
-            joinedGameIDs.insert(event.id)
-            if let index = events.firstIndex(where: { $0.id == event.id }) {
-                let updatedEvent = SportsEvent(
-                    id: events[index].id,
-                    title: events[index].title,
-                    sport: events[index].sport,
-                    time: events[index].time,
-                    locationName: events[index].locationName,
-                    skillLevel: events[index].skillLevel,
-                    spotsLeft: max(events[index].spotsLeft - 1, 0),
-                    coordinate: events[index].coordinate,
-                    hostUid: events[index].hostUid
-                )
-                events[index] = updatedEvent
-            }
-
-            message = "You joined \(event.title)."
         }
     }
 }
 
 #Preview {
     ListView()
+        .environmentObject(EventStore())
 }

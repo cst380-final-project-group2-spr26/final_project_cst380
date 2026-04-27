@@ -7,27 +7,24 @@
 
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 struct MapView: View {
+    @EnvironmentObject private var eventStore: EventStore
+
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 36.6522, longitude: -121.7989),
         span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
     )
-
     @State private var selectedEvent: SportsEvent?
-    @State private var joinedEvents: Set<String> = []
-
-    let events = SportsEvent.sampleEvents
+    @State private var joiningEventIDs: Set<String> = []
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Map(coordinateRegion: $region, annotationItems: events) { event in
+            Map(coordinateRegion: $region, annotationItems: eventStore.events) { event in
                 MapAnnotation(coordinate: event.coordinate) {
                     Button {
-                        withAnimation(.spring()) {
-                            selectedEvent = event
-                            region.center = event.coordinate
-                        }
+                        focus(on: event)
                     } label: {
                         VStack(spacing: 4) {
                             Image(systemName: selectedEvent?.id == event.id ? "figure.run.circle.fill" : "mappin.circle.fill")
@@ -51,21 +48,28 @@ struct MapView: View {
             VStack(spacing: 12) {
                 headerView
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(events) { event in
-                            Button {
-                                withAnimation(.spring()) {
-                                    selectedEvent = event
-                                    region.center = event.coordinate
+                if eventStore.events.isEmpty {
+                    Text("No games on the map yet.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(16)
+                        .padding(.horizontal)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(eventStore.events) { event in
+                                Button {
+                                    focus(on: event)
+                                } label: {
+                                    eventCard(for: event)
                                 }
-                            } label: {
-                                eventCard(for: event)
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
 
                 if let selectedEvent {
@@ -76,7 +80,11 @@ struct MapView: View {
             .padding(.bottom, 10)
         }
         .onAppear {
-            selectedEvent = events.first
+            eventStore.start()
+            syncSelection(with: eventStore.events)
+        }
+        .onChange(of: eventStore.events) { _, newEvents in
+            syncSelection(with: newEvents)
         }
     }
 
@@ -94,11 +102,8 @@ struct MapView: View {
             Spacer()
 
             Button {
-                withAnimation(.easeInOut) {
-                    selectedEvent = events.randomElement()
-                    if let selectedEvent {
-                        region.center = selectedEvent.coordinate
-                    }
+                if let randomEvent = eventStore.events.randomElement() {
+                    focus(on: randomEvent)
                 }
             } label: {
                 Image(systemName: "location.magnifyingglass")
@@ -107,6 +112,7 @@ struct MapView: View {
                     .background(.thinMaterial)
                     .clipShape(Circle())
             }
+            .disabled(eventStore.events.isEmpty)
         }
         .padding()
         .background(.ultraThinMaterial)
@@ -117,7 +123,7 @@ struct MapView: View {
 
     private func eventCard(for event: SportsEvent) -> some View {
         let isSelected = selectedEvent?.id == event.id
-        let isJoined = joinedEvents.contains(event.id)
+        let isJoined = eventStore.joinedGameIDs.contains(event.id)
 
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -166,7 +172,11 @@ struct MapView: View {
     }
 
     private func selectedEventPanel(for event: SportsEvent) -> some View {
-        let isJoined = joinedEvents.contains(event.id)
+        let currentUid = Auth.auth().currentUser?.uid
+        let isHost = event.hostUid == currentUid
+        let isJoined = eventStore.joinedGameIDs.contains(event.id)
+        let isJoining = joiningEventIDs.contains(event.id)
+        let canJoin = !isHost && !isJoined && !isJoining && event.spotsLeft > 0
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -199,51 +209,100 @@ struct MapView: View {
             }
             .foregroundColor(.secondary)
 
-            Text("This is a rough preview card for the selected event. Tapping map pins or cards updates this panel, and the join button just toggles local UI state for now.")
-                .font(.footnote)
-                .foregroundColor(.secondary)
+            if !eventStore.message.isEmpty {
+                Text(eventStore.message)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
 
             HStack(spacing: 12) {
                 Button {
-                    withAnimation(.spring()) {
-                        if joinedEvents.contains(event.id) {
-                            joinedEvents.remove(event.id)
-                        } else {
-                            joinedEvents.insert(event.id)
-                        }
-                    }
+                    joinEvent(event)
                 } label: {
-                    Text(isJoined ? "Joined" : "Attend Event")
+                    Text(joinButtonTitle(isHost: isHost, isJoined: isJoined, isJoining: isJoining, spotsLeft: event.spotsLeft))
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(isJoined ? Color.green : Color.orange)
+                        .background(canJoin ? Color.orange : Color.gray.opacity(0.35))
                         .foregroundColor(.white)
                         .cornerRadius(14)
                 }
+                .disabled(!canJoin)
 
                 Button {
                     withAnimation(.easeInOut) {
                         region.center = event.coordinate
-                        region.span = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
                     }
                 } label: {
                     Image(systemName: "scope")
                         .font(.title3)
                         .frame(width: 48, height: 48)
-                        .background(Color.black.opacity(0.08))
+                        .background(Color.blue.opacity(0.14))
                         .cornerRadius(14)
                 }
             }
         }
         .padding()
-        .background(.white)
+        .background(.thinMaterial)
         .cornerRadius(24)
-        .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: 4)
         .padding(.horizontal)
+    }
+
+    private func joinButtonTitle(isHost: Bool, isJoined: Bool, isJoining: Bool, spotsLeft: Int) -> String {
+        if isHost {
+            return "You Created This Game"
+        }
+
+        if isJoined {
+            return "Joined"
+        }
+
+        if isJoining {
+            return "Joining..."
+        }
+
+        if spotsLeft <= 0 {
+            return "Game Full"
+        }
+
+        return "Join Game"
+    }
+
+    private func joinEvent(_ event: SportsEvent) {
+        joiningEventIDs.insert(event.id)
+        eventStore.message = ""
+
+        eventStore.joinGame(event) { _ in
+            joiningEventIDs.remove(event.id)
+        }
+    }
+
+    private func focus(on event: SportsEvent) {
+        withAnimation(.spring()) {
+            selectedEvent = event
+            region.center = event.coordinate
+        }
+    }
+
+    private func syncSelection(with events: [SportsEvent]) {
+        guard !events.isEmpty else {
+            selectedEvent = nil
+            return
+        }
+
+        if let selectedEvent,
+           let refreshedSelection = events.first(where: { $0.id == selectedEvent.id }) {
+            self.selectedEvent = refreshedSelection
+            return
+        }
+
+        if let newestEvent = events.last {
+            focus(on: newestEvent)
+        }
     }
 }
 
 #Preview {
     MapView()
+        .environmentObject(EventStore())
 }
