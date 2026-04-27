@@ -207,8 +207,73 @@ final class GameService {
         }
     }
 
+    func listenToJoinedGames(completion: @escaping (Result<[SportsEvent], Error>) -> Void) -> ListenerRegistration? {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.success([]))
+            return nil
+        }
+
+        return usersCollection
+            .document(uid)
+            .collection("joinedGames")
+            .order(by: "joinedAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    completion(.failure(self.mapFirestoreError(error, fallback: "Unable to load joined games.")))
+                    return
+                }
+
+                let joinedDocuments = snapshot?.documents ?? []
+
+                guard !joinedDocuments.isEmpty else {
+                    completion(.success([]))
+                    return
+                }
+
+                var eventsByID: [String: SportsEvent] = [:]
+                var firstError: Error?
+                let resultsQueue = DispatchQueue(label: "GameService.joinedGamesResults")
+                let group = DispatchGroup()
+
+                for joinedDocument in joinedDocuments {
+                    group.enter()
+
+                    self.db.collection("games").document(joinedDocument.documentID).getDocument { gameSnapshot, error in
+                        resultsQueue.async {
+                            defer { group.leave() }
+
+                            if let error = error {
+                                firstError = firstError ?? error
+                                return
+                            }
+
+                            guard let gameSnapshot,
+                                  let data = gameSnapshot.data() else {
+                                return
+                            }
+
+                            eventsByID[joinedDocument.documentID] = self.makeSportsEvent(id: gameSnapshot.documentID, data: data)
+                        }
+                    }
+                }
+
+                group.notify(queue: .main) {
+                    if let firstError {
+                        completion(.failure(self.mapFirestoreError(firstError, fallback: "Unable to load joined games.")))
+                        return
+                    }
+
+                    let events = joinedDocuments.compactMap { eventsByID[$0.documentID] }
+                    completion(.success(events))
+                }
+            }
+    }
+
     private func makeSportsEvent(from doc: QueryDocumentSnapshot) -> SportsEvent {
-        let data = doc.data()
+        makeSportsEvent(id: doc.documentID, data: doc.data())
+    }
+
+    private func makeSportsEvent(id: String, data: [String: Any]) -> SportsEvent {
 
         let title = data["title"] as? String ?? "Untitled Game"
         let sport = data["sport"] as? String ?? "Unknown Sport"
@@ -226,7 +291,7 @@ final class GameService {
         formatter.timeStyle = .short
 
         return SportsEvent(
-            id: doc.documentID,
+            id: id,
             title: title,
             sport: sport,
             time: formatter.string(from: date),
