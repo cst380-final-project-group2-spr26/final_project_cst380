@@ -117,6 +117,9 @@ https://www.loom.com/share/1cde24bffd9f4c1d91601cbbfe715d14
 https://www.loom.com/share/4cbef110d1ab4e819631d96daa7384d5
 https://youtube.com/shorts/-gj1ybMOnmA
 
+### Demo Day Demo Video
+https://youtu.be/G293ecqU6rg
+
 ## Schema 
 
 
