@@ -23,4 +23,5 @@ Carthage/Build/
 
 # Temporary files
 *.swp
-*.tmp.derivedData/
+*.tmp
+.derivedData/

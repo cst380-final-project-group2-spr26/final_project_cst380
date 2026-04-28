@@ -305,7 +305,10 @@ final class GameService {
 //    }
 
     private func makeSportsEvent(from doc: QueryDocumentSnapshot) -> SportsEvent {
-        let data = doc.data()
+        makeSportsEvent(id: doc.documentID, data: doc.data())
+    }
+
+    private func makeSportsEvent(id: String, data: [String: Any]) -> SportsEvent {
 
         let title = data["title"] as? String ?? "Untitled Game"
         let sport = data["sport"] as? String ?? "Unknown Sport"
@@ -323,7 +326,7 @@ final class GameService {
         formatter.timeStyle = .short
 
         return SportsEvent(
-            id: doc.documentID,
+            id: id,
             title: title,
             sport: sport,
             time: formatter.string(from: date),
