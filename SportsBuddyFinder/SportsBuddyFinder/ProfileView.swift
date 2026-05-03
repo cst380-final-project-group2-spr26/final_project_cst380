@@ -181,7 +181,7 @@ struct ProfileView: View {
 
     private func startListening() {
         listenToProfile()
-        listenToJoinedGames()
+//        listenToJoinedGames()
     }
 
     private func stopListening() {
@@ -220,22 +220,22 @@ struct ProfileView: View {
             }
     }
 
-    private func listenToJoinedGames() {
-        joinedGamesListener?.remove()
-        joinedGamesListener = GameService.shared.listenToJoinedGames { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let games):
-                    joinedGames = games
-                    if !message.contains("profile picture") {
-                        message = ""
-                    }
-                case .failure(let error):
-                    message = error.localizedDescription
-                }
-            }
-        }
-    }
+//    private func listenToJoinedGames() {
+//        joinedGamesListener?.remove()
+//        joinedGamesListener = GameService.shared.listenToJoinedGames { result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let games):
+//                    joinedGames = games
+//                    if !message.contains("profile picture") {
+//                        message = ""
+//                    }
+//                case .failure(let error):
+//                    message = error.localizedDescription
+//                }
+//            }
+//        }
+//    }
 
     private func updateProfileImage(from item: PhotosPickerItem?) {
         guard let item else {
