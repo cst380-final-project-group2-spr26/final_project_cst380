@@ -350,7 +350,6 @@ final class EventStore: ObservableObject {
 
     init(gameService: GameService = .shared) {
         self.gameService = gameService
-        start()
     }
 
     deinit {
@@ -377,6 +376,14 @@ final class EventStore: ObservableObject {
         refreshJoinedGameIDs()
     }
 
+    func stop() {
+        gamesListener?.remove()
+        gamesListener = nil
+        events = []
+        joinedGameIDs = []
+        message = ""
+    }
+
     func refreshJoinedGameIDs() {
         gameService.fetchJoinedGameIDs { [weak self] result in
             Task { @MainActor in
@@ -386,6 +393,36 @@ final class EventStore: ObservableObject {
                 case .failure(let error):
                     self?.message = error.localizedDescription
                 }
+            }
+        }
+    }
+
+    func createGame(
+        sport: String,
+        gameDate: Date,
+        locationName: String,
+        latitude: Double,
+        longitude: Double,
+        completion: @escaping (Error?) -> Void
+    ) {
+        start()
+
+        gameService.createGame(
+            sport: sport,
+            gameDate: gameDate,
+            locationName: locationName,
+            latitude: latitude,
+            longitude: longitude
+        ) { [weak self] error in
+            Task { @MainActor in
+                if let error {
+                    self?.message = error.localizedDescription
+                    completion(error)
+                    return
+                }
+
+                self?.message = ""
+                completion(nil)
             }
         }
     }
