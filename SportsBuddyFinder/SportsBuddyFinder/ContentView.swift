@@ -23,6 +23,18 @@ struct ContentView: View {
         }
         .onAppear {
             isLoggedIn = Auth.auth().currentUser != nil
+            updateEventStoreSubscription()
+        }
+        .onChange(of: isLoggedIn) { _, _ in
+            updateEventStoreSubscription()
+        }
+    }
+
+    private func updateEventStoreSubscription() {
+        if isLoggedIn {
+            eventStore.start()
+        } else {
+            eventStore.stop()
         }
     }
 }

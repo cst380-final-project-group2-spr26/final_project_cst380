@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct CreateView: View {
+    @EnvironmentObject private var eventStore: EventStore
     @State private var sport = ""
     @State private var selectedDate = Date()
     @State private var selectedCoordinate: CLLocationCoordinate2D?
@@ -131,7 +132,7 @@ struct CreateView: View {
             return
         }
 
-        GameService.shared.createGame(
+        eventStore.createGame(
             sport: sport,
             gameDate: selectedDate,
             locationName: selectedLocationName.isEmpty ? "Pinned Location" : selectedLocationName,
