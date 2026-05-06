@@ -8,19 +8,32 @@
 import SwiftUI
 import EventKit
 
+// Displays detailed information about a selected game.
+// Allows users to join/leave the game and add it to their calendar.
 struct GameDetailView: View {
+    // The selected game being viewed
     let event: SportsEvent
+    
+    // Tracks whether the current user has joined this game
     @Binding var isJoined: Bool
+    
+    // Shared app state for updating events and Firebase data
     @EnvironmentObject var eventStore: EventStore
+    
+    // Callback to notify parent view when join/leave status changes
     let onStatusChange: () -> Void
 
+    // Controls alert for saving to calendar
     @State private var showSavedAlert = false
+    
+    // Controls confirmation alert for leaving a game
     @State private var showLeaveAlert = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
 
+                // Game title and sport
                 VStack(spacing: 6) {
                     Text(event.title)
                         .font(.largeTitle)
@@ -31,6 +44,7 @@ struct GameDetailView: View {
                         .font(.title3)
                 }
 
+                // Game details (time, location, spots, skill level)
                 VStack(alignment: .leading, spacing: 12) {
 
                     Label(event.time, systemImage: "clock")
@@ -63,9 +77,11 @@ struct GameDetailView: View {
                 .cornerRadius(20)
                 .shadow(radius: 4)
 
+                // Join / Leave + Calendar actions
                 VStack(spacing: 12) {
 
                     Button {
+                        // If already joined, show confirmation before leaving
                         if isJoined {
                             showLeaveAlert = true
                         } else {
@@ -86,6 +102,7 @@ struct GameDetailView: View {
 //                    .foregroundColor(.white)
 //                    .cornerRadius(12)
 
+                    // Add event to device calendar
                     Button("Add to Calendar") {
                         addToCalendar()
                     }
@@ -101,6 +118,7 @@ struct GameDetailView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Game Details")
+        // Confirmation alert before leaving a game
         .alert("Leave Game?", isPresented: $showLeaveAlert) {
             Button("Leave", role: .destructive) {
                 unjoinGame()
@@ -110,11 +128,13 @@ struct GameDetailView: View {
             Text("Are you sure you want to leave this game?")
         }
         
+        // Alert shown after successfully adding to calendar
         .alert("Saved to Calendar!", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) {}
         }
     }
     
+    // Removes the user from the game and updates Firebase + UI
     func unjoinGame() {
         eventStore.leaveGame(event) { error in
             if let error = error {
@@ -129,6 +149,7 @@ struct GameDetailView: View {
         }
     }
     
+    // Adds the user to the game and updates Firebase + UI
     func joinGame() {
         eventStore.joinGame(event) { error in
             if let error = error {
@@ -143,6 +164,7 @@ struct GameDetailView: View {
         }
     }
     
+    // Uses EventKit to save the game as a calendar event
     func addToCalendar() {
         let eventStore = EKEventStore()
 

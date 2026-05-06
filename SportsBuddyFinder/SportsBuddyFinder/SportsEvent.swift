@@ -8,23 +8,44 @@
 import Foundation
 import MapKit
 
+// Represents a sports game/event in the app.
+// Used for displaying and managing game data across views.
 struct SportsEvent: Identifiable, Equatable {
+    // Unique identifier for the event (from Firestore)
     let id: String
+    
+    // Title of the game
     let title: String
+    
+    // Type of sport (e.g., Basketball, Soccer)
     let sport: String
+    
+    // Formatted date and time string
     let time: String
+    
+    // Name of the event location
     let locationName: String
+    
+    // Skill level of the game (e.g., Beginner, Intermediate)
     let skillLevel: String
+    
+    // Number of spots remaining for the event
     let spotsLeft: Int
+    
+    // Geographic coordinate used for MapKit display
     let coordinate: CLLocationCoordinate2D
+    
+    // ID of the user who created the event
     let hostUid: String?
 
+    // Determines equality based on unique event ID
     static func == (lhs: SportsEvent, rhs: SportsEvent) -> Bool {
         lhs.id == rhs.id
     }
 }
 
 extension SportsEvent {
+    // Sample events used for testing and previews
     static let sampleEvents: [SportsEvent] = [
         SportsEvent(
             id: UUID().uuidString,

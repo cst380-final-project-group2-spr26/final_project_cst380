@@ -8,13 +8,20 @@
 import SwiftUI
 import FirebaseAuth
 
+// Displays a list of available games.
+// Allows users to browse, join, and navigate to detailed game views.
 struct ListView: View {
+    
+    // Shared event data and Firebase state
     @EnvironmentObject private var eventStore: EventStore
+    
+    // Tracks games currently being joined (for loading state)
     @State private var joiningGameIDs: Set<String> = []
 
     var body: some View {
         NavigationStack {
             ZStack {
+                // Background gradient styling
                 LinearGradient(
                     colors: [Color.blue, Color.purple],
                     startPoint: .topLeading,
@@ -30,17 +37,20 @@ struct ListView: View {
                             .foregroundColor(.white)
                             .padding(.top)
 
+                        // Displays error or success messages from EventStore
                         if !eventStore.message.isEmpty {
                             Text(eventStore.message)
                                 .foregroundColor(.white)
                                 .font(.caption)
                         }
 
+                        // Empty state when no games exist
                         if eventStore.events.isEmpty {
                             Text("No games available yet.")
                                 .foregroundColor(.white.opacity(0.85))
                                 .padding(.top, 40)
                         } else {
+                            // List of games with navigation to detail view
                             ForEach(eventStore.events) { event in
                                 NavigationLink(
                                         destination: GameDetailView(
@@ -72,15 +82,18 @@ struct ListView: View {
                 }
             }
             .navigationBarHidden(true)
+            // Start listening for real-time game updates
             .onAppear {
                 eventStore.start()
             }
+            // Pull-to-refresh manually restarts listener
             .refreshable {
                 eventStore.start()
             }
         }
     }
 
+    // Displays a single game card with details and join button
     private func eventRow(for event: SportsEvent) -> some View {
         let currentUid = Auth.auth().currentUser?.uid
         let isHost = event.hostUid == currentUid
@@ -128,6 +141,7 @@ struct ListView: View {
                     .foregroundColor(.secondary)
             }
 
+            // Join button with state handling
             Button {
                 joinGame(event)
             } label: {
@@ -147,6 +161,7 @@ struct ListView: View {
         .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
     }
 
+    // Determines the correct label for the join button based on game state
     private func joinButtonTitle(isHost: Bool, isJoined: Bool, isJoining: Bool, spotsLeft: Int) -> String {
         if isHost {
             return "You Created This Game"
@@ -167,6 +182,7 @@ struct ListView: View {
         return "Join Game"
     }
 
+    // Handles joining a game and updates UI state
     private func joinGame(_ event: SportsEvent) {
         joiningGameIDs.insert(event.id)
 

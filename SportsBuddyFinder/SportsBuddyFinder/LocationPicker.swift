@@ -9,29 +9,47 @@ import SwiftUI
 import MapKit
 import CoreLocation
 
+// Allows the user to select a location on a map or search for one.
+// Returns the selected coordinate and location name back to the parent view.
 struct LocationPickerView: View {
+    // Used to dismiss the sheet after selecting a location
     @Environment(\.dismiss) private var dismiss
 
+    // Binding to pass selected coordinate back to parent view
     @Binding var selectedCoordinate: CLLocationCoordinate2D?
+    
+    // Binding to pass selected location name back to parent view
     @Binding var selectedLocationName: String
 
+    // Handles location search and autocomplete results
     @StateObject private var searchService = LocationSearchService()
+    
+    // Controls the visible region of the map
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 36.6522, longitude: -121.7989),
             span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )
     )
+    // Search input text
     @State private var searchText = ""
+    
+    // Temporary coordinate selected by the user before confirmation
     @State private var tempCoordinate: CLLocationCoordinate2D?
+    
+    // Temporary location name (resolved from coordinates or search)
     @State private var tempLocationName = ""
+    
+    // Indicates if reverse geocoding is in progress
     @State private var isResolvingLocation = false
 
     var body: some View {
         NavigationStack {
             VStack {
+                // Interactive map for selecting a location
                 MapReader { proxy in
                     Map(position: $cameraPosition, interactionModes: .all) {
+                        // Display pin if a location is selected
                         if let tempCoordinate {
                             Annotation("Selected Location", coordinate: tempCoordinate) {
                                 Image(systemName: "mappin.circle.fill")
@@ -45,6 +63,7 @@ struct LocationPickerView: View {
                         MapPitchToggle()
                         MapScaleView()
                     }
+                    // Convert tap location into geographic coordinates
                     .onTapGesture { screenPoint in
                         if let coordinate = proxy.convert(screenPoint, from: .local) {
                             tempCoordinate = coordinate
@@ -56,10 +75,12 @@ struct LocationPickerView: View {
                 .frame(maxHeight: .infinity)
 
                 VStack(spacing: 12) {
+                    // Display search results if available
                     if !searchService.results.isEmpty {
                         searchResults
                     }
 
+                    // Show selected location info
                     if let tempCoordinate {
                         Text(tempLocationName.isEmpty ? "Pinned Location" : tempLocationName)
                             .font(.subheadline)
@@ -78,6 +99,7 @@ struct LocationPickerView: View {
                             .foregroundColor(.secondary)
                     }
 
+                    // Confirm selected location
                     Button("Confirm Location") {
                         selectedCoordinate = tempCoordinate
                         selectedLocationName = tempLocationName.isEmpty ? "Pinned Location" : tempLocationName
@@ -95,10 +117,16 @@ struct LocationPickerView: View {
             }
             .navigationTitle("Pick Location")
             .navigationBarTitleDisplayMode(.inline)
+            
+            // Search bar for finding locations
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search for a park, gym, or address")
+            
+            // Update search results when text changes
             .onChange(of: searchText) { _, newValue in
                 searchService.updateQuery(newValue)
             }
+            
+            // Restore previous selection if available
             .onAppear {
                 if let selectedCoordinate {
                     tempCoordinate = selectedCoordinate
@@ -111,6 +139,7 @@ struct LocationPickerView: View {
                     )
                 }
             }
+            // Cancel button to dismiss picker
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
@@ -121,6 +150,7 @@ struct LocationPickerView: View {
         }
     }
 
+    // Displays search autocomplete results
     private var searchResults: some View {
         ScrollView {
             VStack(spacing: 8) {
@@ -150,6 +180,7 @@ struct LocationPickerView: View {
         .frame(maxHeight: 180)
     }
 
+    // Converts a search result into coordinates and updates the map
     private func selectCompletion(_ completion: MKLocalSearchCompletion) {
         Task {
             do {
@@ -180,6 +211,7 @@ struct LocationPickerView: View {
         }
     }
 
+    // Converts coordinates into a human-readable location name using reverse geocoding
     private func resolveLocationName(for coordinate: CLLocationCoordinate2D) {
         isResolvingLocation = true
 
@@ -211,6 +243,7 @@ struct LocationPickerView: View {
     }
 }
 
+// Provides autocomplete location search using MapKit
 final class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     @Published var results: [MKLocalSearchCompletion] = []
 
@@ -222,6 +255,7 @@ final class LocationSearchService: NSObject, ObservableObject, MKLocalSearchComp
         completer.resultTypes = [.address, .pointOfInterest]
     }
 
+    // Updates search query and triggers autocomplete suggestions
     func updateQuery(_ query: String) {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -233,16 +267,21 @@ final class LocationSearchService: NSObject, ObservableObject, MKLocalSearchComp
         completer.queryFragment = trimmed
     }
 
+    // Clears current search results
     func clearResults() {
         results = []
     }
 
+    // Called when the search completer returns updated autocomplete results.
+    // Limits results to the top 6 suggestions and updates the UI.
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         DispatchQueue.main.async {
             self.results = Array(completer.results.prefix(6))
         }
     }
 
+    // Called when the search completer encounters an error.
+    // Clears results to prevent displaying outdated or invalid suggestions.
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         DispatchQueue.main.async {
             self.results = []
