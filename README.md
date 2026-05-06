@@ -31,8 +31,8 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - [X] User can register a new account and log in.
 - [X] User can view a Map/List of nearby pickup games.
 - [X] User can create a new game lobby (specifying sport, time, location, and difficulty).
-- [ ] User can "Join" a game lobby to notify the host.
-- [ ] User can view their profile and a list of games they are attending.
+- [] User can "Join" a game lobby to notify the host.
+- [X] User can view their profile and a list of games they are attending.
 
 **Optional Nice-to-have Stories**
 
@@ -45,14 +45,14 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - [X] Login / Register Screen
 - [X] User can sign up or log in to their account.
 - [X] Map View (Home)
-- [ ] User can see pins of nearby games and filter by sport.
-- [ ] Stream/List View
+- [X] User can see pins of nearby games and filter by sport.
+- [X] Stream/List View
 - [X] User can scroll through a list of upcoming games sorted by time or proximity.
 - [X] Creation Screen
 - [X] User can fill out a form to host a new game.
 - [X] User can see specific game details (who is playing, exact location, rules).
 - [X] Profile Screen
-- [ ] User can see their stats, bio, and history of games played.
+- [X] User can see their stats, bio, and history of games played.
 
 ### 3. Navigation
 
@@ -60,11 +60,11 @@ Sports Buddy Finder is a social networking app designed to bridge the gap betwee
 - [X] Map: Browse games geographically.
 - [X] List: Browse games chronologically.
 - [X] Create: Host a new game.
-- [ ] Profile: Manage user settings and history.
+- [X] Profile: Manage user settings and history.
   
 **Flow Navigation** (Screen to Screen)
 - [X] Map/List View * Leads to Detail View when a game is selected.
-- [ ] Leads back to Map/List or stays on page after "Join" is clicked.
+- [] Leads back to Map/List or stays on page after "Join" is clicked.
 - [X] Creation Screen
 - [X] Leads to Map/List after the game is successfully posted.
 
