@@ -8,11 +8,18 @@
 import SwiftUI
 import FirebaseAuth
 
+// Login screen that allows users to authenticate using email and password.
+// Updates app state upon successful login.
 struct LoginView: View {
+    
+    // Binding used to update global login state
     @Binding var isLoggedIn: Bool
 
+    // User input for email and password
     @State private var email = ""
     @State private var password = ""
+    
+    // Displays login error messages
     @State private var message = ""
 
     var body: some View {
@@ -44,6 +51,7 @@ struct LoginView: View {
 
                     //login
                     VStack(spacing: 20) {
+                        // Login form
                         Text("Welcome Back")
                             .font(.largeTitle)
                             .fontWeight(.bold)
@@ -51,12 +59,15 @@ struct LoginView: View {
                         Text("Log in to continue")
                             .foregroundColor(.gray)
 
+                        // Email input
                         AuthTextField(placeholder: "Email", text: $email)
                             .keyboardType(.emailAddress)
                             .textInputAutocapitalization(.never)
 
+                        // Password input
                         AuthTextField(placeholder: "Password", text: $password, isSecure: true)
 
+                        // Login button
                         Button(action: login) {
                             Text("Log In")
                                 .frame(maxWidth: .infinity)
@@ -66,11 +77,13 @@ struct LoginView: View {
                                 .cornerRadius(12)
                         }
 
+                        // Navigation to registration screen
                         NavigationLink("Don't have an account? Sign Up") {
                             RegisterView(isLoggedIn: $isLoggedIn)
                         }
                         .font(.footnote)
 
+                        // Display error message if login fails
                         if !message.isEmpty {
                             Text(message)
                                 .foregroundColor(.red)
@@ -89,7 +102,7 @@ struct LoginView: View {
         }
     }
 
-    //Firebase Login
+    // Authenticates user with Firebase using email and password
     func login() {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
@@ -97,6 +110,7 @@ struct LoginView: View {
                 return
             }
 
+            // Update login state on success
             message = ""
             isLoggedIn = true
         }

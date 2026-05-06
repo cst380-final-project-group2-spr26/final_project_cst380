@@ -9,24 +9,35 @@ import SwiftUI
 import MapKit
 import FirebaseAuth
 
+// Displays games on a map with interactive pins.
+// Users can select games, view details, and join directly from the map.
 struct MapView: View {
+    
+    // Shared event data and Firebase state
     @EnvironmentObject private var eventStore: EventStore
 
+    // Current visible map region
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 36.6522, longitude: -121.7989),
         span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
     )
+    
+    // Currently selected game (used for highlighting and detail panel)
     @State private var selectedEvent: SportsEvent?
+    
+    // Tracks games currently being joined (loading state)
     @State private var joiningEventIDs: Set<String> = []
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // Map displaying game locations as interactive annotations
             Map(coordinateRegion: $region, annotationItems: eventStore.events) { event in
                 MapAnnotation(coordinate: event.coordinate) {
                     Button {
                         focus(on: event)
                     } label: {
                         VStack(spacing: 4) {
+                            // Highlight selected event with larger icon
                             Image(systemName: selectedEvent?.id == event.id ? "figure.run.circle.fill" : "mappin.circle.fill")
                                 .font(.system(size: selectedEvent?.id == event.id ? 34 : 28))
                                 .foregroundColor(selectedEvent?.id == event.id ? .orange : .blue)
@@ -48,6 +59,7 @@ struct MapView: View {
             VStack(spacing: 12) {
                 headerView
 
+                // Horizontal scroll of event cards
                 if eventStore.events.isEmpty {
                     Text("No games on the map yet.")
                         .font(.subheadline)
@@ -72,6 +84,7 @@ struct MapView: View {
                     }
                 }
 
+                // Bottom panel showing selected event details
                 if let selectedEvent {
                     selectedEventPanel(for: selectedEvent)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -79,15 +92,18 @@ struct MapView: View {
             }
             .padding(.bottom, 10)
         }
+        // Start listening for real-time data when view appears
         .onAppear {
             eventStore.start()
             syncSelection(with: eventStore.events)
         }
+        // Keeps selected event updated when data changes
         .onChange(of: eventStore.events) { _, newEvents in
             syncSelection(with: newEvents)
         }
     }
 
+    // Header displaying app title and quick navigation button
     private var headerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -121,6 +137,7 @@ struct MapView: View {
         .padding(.top, 12)
     }
 
+    // Displays a summary card for a game in the horizontal list
     private func eventCard(for event: SportsEvent) -> some View {
         let isSelected = selectedEvent?.id == event.id
         let isJoined = eventStore.joinedGameIDs.contains(event.id)
@@ -171,6 +188,8 @@ struct MapView: View {
         .scaleEffect(isSelected ? 1.02 : 1.0)
     }
 
+    // Displays detailed information for the selected event,
+    // including join button and quick navigation controls
     private func selectedEventPanel(for event: SportsEvent) -> some View {
         let currentUid = Auth.auth().currentUser?.uid
         let isHost = event.hostUid == currentUid
@@ -248,6 +267,7 @@ struct MapView: View {
         .padding(.horizontal)
     }
 
+    // Determines the correct label for the join button based on game state
     private func joinButtonTitle(isHost: Bool, isJoined: Bool, isJoining: Bool, spotsLeft: Int) -> String {
         if isHost {
             return "You Created This Game"
@@ -268,6 +288,7 @@ struct MapView: View {
         return "Join Game"
     }
 
+    // Handles joining a game and updates UI state
     private func joinEvent(_ event: SportsEvent) {
         joiningEventIDs.insert(event.id)
         eventStore.message = ""
@@ -277,6 +298,7 @@ struct MapView: View {
         }
     }
 
+    // Centers the map and updates selected event when a user taps a pin or card
     private func focus(on event: SportsEvent) {
         withAnimation(.spring()) {
             selectedEvent = event
@@ -284,6 +306,7 @@ struct MapView: View {
         }
     }
 
+    // Ensures the selected event stays valid when data updates, like when events refresh from Firebase
     private func syncSelection(with events: [SportsEvent]) {
         guard !events.isEmpty else {
             selectedEvent = nil

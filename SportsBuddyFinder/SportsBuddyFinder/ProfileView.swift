@@ -11,15 +11,32 @@ import FirebaseFirestore
 import PhotosUI
 import UIKit
 
+// Displays user profile information including username, profile picture,
+// and games the user has joined. Also allows logout and profile image updates.
 struct ProfileView: View {
+    
+    // Binding used to update login state when user logs out
     @Binding var isLoggedIn: Bool
 
+    // Username displayed on profile
     @State private var username = "Player"
+    
+    // Stores profile image data (loaded from Firestore)
     @State private var profileImageData: Data?
+    
+    // Selected photo from photo picker
     @State private var selectedPhotoItem: PhotosPickerItem?
+    
+    // List of games the user has joined
     @State private var joinedGames: [SportsEvent] = []
+    
+    // Displays status or error messages
     @State private var message = ""
+    
+    // Firestore listener for profile updates
     @State private var profileListener: ListenerRegistration?
+    
+    // Listener for joined games
     @State private var joinedGamesListener: ListenerRegistration?
 
     var body: some View {
@@ -35,6 +52,7 @@ struct ProfileView: View {
                 VStack(spacing: 20) {
                     profileHeader
 
+                    // Display messages (errors or updates)
                     if !message.isEmpty {
                         Text(message)
                             .font(.caption)
@@ -44,6 +62,7 @@ struct ProfileView: View {
 
                     joinedGamesSection
 
+                    // Logout button
                     Button("Log Out") {
                         try? Auth.auth().signOut()
                         isLoggedIn = false
@@ -57,17 +76,21 @@ struct ProfileView: View {
                 .padding()
             }
         }
+        // Start/stop listeners when view appears/disappears
         .onAppear {
             startListening()
         }
         .onDisappear {
             stopListening()
         }
+        
+        // Updates profile image when a new photo is selected
         .onChange(of: selectedPhotoItem) { _, newItem in
             updateProfileImage(from: newItem)
         }
     }
 
+    // Displays profile image, username, and joined game count
     private var profileHeader: some View {
         VStack(spacing: 14) {
             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
@@ -104,6 +127,7 @@ struct ProfileView: View {
         .padding(.top, 24)
     }
 
+    // Displays user's profile image or a default placeholder if none exists
     private var profileImage: some View {
         Group {
             if let profileImageData,
@@ -121,6 +145,7 @@ struct ProfileView: View {
         }
     }
 
+    // Displays a list of games the user has joined
     private var joinedGamesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Joined Games")
@@ -144,6 +169,7 @@ struct ProfileView: View {
         }
     }
 
+    // Displays summary information for a joined game
     private func joinedGameCard(for game: SportsEvent) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -179,11 +205,13 @@ struct ProfileView: View {
         .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
     }
 
+    // Starts Firestore listeners for profile data
     private func startListening() {
         listenToProfile()
-//        listenToJoinedGames()
+        listenToJoinedGames()
     }
 
+    // Stops Firestore listeners when view is no longer visible
     private func stopListening() {
         profileListener?.remove()
         joinedGamesListener?.remove()
@@ -191,6 +219,7 @@ struct ProfileView: View {
         joinedGamesListener = nil
     }
 
+    // Listens for real-time updates to user profile data in Firestore
     private func listenToProfile() {
         guard let uid = Auth.auth().currentUser?.uid else {
             return
@@ -236,7 +265,70 @@ struct ProfileView: View {
 //            }
 //        }
 //    }
+    
+    private func listenToJoinedGames() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
+        joinedGamesListener?.remove()
+
+        joinedGamesListener = Firestore.firestore()
+            .collection("games")
+            .addSnapshotListener { snapshot, error in
+
+                if let error = error {
+                    DispatchQueue.main.async {
+                        message = error.localizedDescription
+                    }
+                    return
+                }
+
+                var updatedGames: [SportsEvent] = []
+                let group = DispatchGroup()
+
+                snapshot?.documents.forEach { doc in
+                    group.enter()
+
+                    Firestore.firestore()
+                        .collection("games")
+                        .document(doc.documentID)
+                        .collection("attendees")
+                        .document(uid)
+                        .getDocument { attendeeDoc, _ in
+
+                            if attendeeDoc?.exists == true {
+                                let data = doc.data()
+
+                                let event = SportsEvent(
+                                    id: doc.documentID,
+                                    title: data["title"] as? String ?? "",
+                                    sport: data["sport"] as? String ?? "",
+                                    time: (data["gameDate"] as? Timestamp)?
+                                        .dateValue()
+                                        .formatted() ?? "",
+                                    locationName: data["locationName"] as? String ?? "",
+                                    skillLevel: data["skillLevel"] as? String ?? "",
+                                    spotsLeft: data["spotsLeft"] as? Int ?? 0,
+                                    coordinate: CLLocationCoordinate2D(
+                                        latitude: data["latitude"] as? Double ?? 0,
+                                        longitude: data["longitude"] as? Double ?? 0
+                                    ),
+                                    hostUid: data["hostUid"] as? String
+                                )
+
+                                updatedGames.append(event)
+                            }
+
+                            group.leave()
+                        }
+                }
+
+                group.notify(queue: .main) {
+                    joinedGames = updatedGames
+                }
+            }
+    }
+
+    // Loads selected image and prepares it for upload
     private func updateProfileImage(from item: PhotosPickerItem?) {
         guard let item else {
             return
@@ -260,6 +352,7 @@ struct ProfileView: View {
     }
 
     @MainActor
+    // Saves compressed profile image to Firestore
     private func saveProfileImageData(_ data: Data) async {
         guard let uid = Auth.auth().currentUser?.uid else {
             return
@@ -283,6 +376,7 @@ struct ProfileView: View {
         }
     }
 
+    // Compresses and resizes image before uploading to reduce storage usage
     private func compressedProfileImageData(from image: UIImage) -> Data? {
         let maxLength: CGFloat = 500
         let scale = min(maxLength / image.size.width, maxLength / image.size.height, 1)

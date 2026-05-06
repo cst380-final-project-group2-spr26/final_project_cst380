@@ -11,23 +11,31 @@ import FirebaseAuth
 import FirebaseFirestore
 import CoreLocation
 
+// Handles all Firebase interactions related to games.
+// Includes creating games, joining/leaving games, and fetching data.
 final class GameService {
+    
+    // Shared singleton instance
     static let shared = GameService()
-
+    
+    // Firestore database reference
     private let db = Firestore.firestore()
 
     private init() {}
 
+    // Reference to the users collection in Firestore
     private var usersCollection: CollectionReference {
         db.collection("users")
     }
 
+    // Creates a standardized error with a message
     private func appError(_ message: String, code: Int = 0) -> Error {
         NSError(domain: "GameService", code: code, userInfo: [
             NSLocalizedDescriptionKey: message
         ])
     }
 
+    // Maps Firestore errors to user-friendly messages
     private func mapFirestoreError(_ error: Error, fallback: String) -> Error {
         let nsError = error as NSError
 
@@ -43,6 +51,7 @@ final class GameService {
         return appError(message.isEmpty ? fallback : message, code: nsError.code)
     }
 
+    // Observes game data in real-time using Firestore snapshot listeners
     func observeGames(onChange: @escaping (Result<[SportsEvent], Error>) -> Void) -> ListenerRegistration {
         db.collection("games")
             .order(by: "gameDate", descending: false)
@@ -57,6 +66,7 @@ final class GameService {
             }
     }
 
+    // Creates a new game in Firestore
     func createGame(
         sport: String,
         gameDate: Date,
@@ -98,6 +108,7 @@ final class GameService {
         }
     }
 
+    // Fetches all games from Firestore (non-realtime)
     func fetchGames(completion: @escaping (Result<[SportsEvent], Error>) -> Void) {
         db.collection("games")
             .order(by: "gameDate", descending: false)
@@ -113,6 +124,7 @@ final class GameService {
             }
     }
     
+    // Retrieves IDs of games the current user has joined
     func fetchJoinedGameIDs(completion: @escaping (Result<Set<String>, Error>) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -168,6 +180,7 @@ final class GameService {
 //            }
 //    }
     
+    // Leaves a game and updates available spots
     func leaveGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -184,6 +197,7 @@ final class GameService {
 
             let currentSpots = gameDoc.data()?["spotsLeft"] as? Int ?? 0
 
+            // Remove user and increase spots
             transaction.deleteDocument(attendeeRef)
 
             transaction.updateData([
@@ -196,6 +210,7 @@ final class GameService {
         }
     }
     
+    // Joins a game using a Firestore transaction to prevent race conditions
     func joinGame(event: SportsEvent, completion: @escaping (Error?) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -216,6 +231,7 @@ final class GameService {
                 return nil
             }
 
+            // Add user and decrease spots atomically
             transaction.setData([
                 "joinedAt": Timestamp()
             ], forDocument: attendeeRef)
@@ -304,6 +320,7 @@ final class GameService {
 //        }
 //    }
 
+    // Converts Firestore document into SportsEvent model
     private func makeSportsEvent(from doc: QueryDocumentSnapshot) -> SportsEvent {
         makeSportsEvent(id: doc.documentID, data: doc.data())
     }
@@ -340,9 +357,15 @@ final class GameService {
 }
 
 @MainActor
+// Manages shared application state and synchronizes UI with Firestore data
 final class EventStore: ObservableObject {
+    // List of all available games
     @Published var events: [SportsEvent] = []
+    
+    // IDs of games the current user has joined
     @Published var joinedGameIDs: Set<String> = []
+    
+    // Message for UI feedback (errors, confirmations)
     @Published var message = ""
 
     private let gameService: GameService
@@ -356,6 +379,7 @@ final class EventStore: ObservableObject {
         gamesListener?.remove()
     }
 
+    // Starts listening for real-time game updates
     func start() {
         if gamesListener == nil {
             gamesListener = gameService.observeGames { [weak self] result in
@@ -376,6 +400,7 @@ final class EventStore: ObservableObject {
         refreshJoinedGameIDs()
     }
 
+    // Stops listeners and clears state when user logs out
     func stop() {
         gamesListener?.remove()
         gamesListener = nil
@@ -384,6 +409,8 @@ final class EventStore: ObservableObject {
         message = ""
     }
 
+    // Refreshes the list of games the current user has joined
+    // by fetching data from Firestore and updating local state
     func refreshJoinedGameIDs() {
         gameService.fetchJoinedGameIDs { [weak self] result in
             Task { @MainActor in
@@ -397,6 +424,8 @@ final class EventStore: ObservableObject {
         }
     }
 
+    // Creates a new game and updates Firebase via GameService.
+    // Starts the listener to ensure UI updates after creation.
     func createGame(
         sport: String,
         gameDate: Date,
@@ -427,6 +456,7 @@ final class EventStore: ObservableObject {
         }
     }
     
+    // Removes the current user from a game and updates both Firebase and local UI state
     func leaveGame(_ event: SportsEvent, completion: ((Error?) -> Void)? = nil) {
         gameService.leaveGame(event: event) { [weak self] error in
             Task { @MainActor in
@@ -464,6 +494,7 @@ final class EventStore: ObservableObject {
         }
     }
 
+    // Adds the current user to a game and updates UI state immediately
     func joinGame(_ event: SportsEvent, completion: ((Error?) -> Void)? = nil) {
         gameService.joinGame(event: event) { [weak self] error in
             Task { @MainActor in
@@ -473,7 +504,10 @@ final class EventStore: ObservableObject {
                     return
                 }
 
+                // Mark this game as joined
                 self?.joinedGameIDs.insert(event.id)
+                
+                // Update UI immediately to reflect reduced spots
                 self?.events = self?.events.map { currentEvent in
                     guard currentEvent.id == event.id else {
                         return currentEvent
